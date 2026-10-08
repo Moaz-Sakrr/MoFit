@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>دخول المتدربين | MoFit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lalezar&family=Readex+Pro:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body class="auth-page">
+
+<aside class="auth-photo">
+  <img src="images/coach-hero.jpg" alt="">
+  <div class="auth-photo-copy">
+    <a class="logo" href="index.html"><i></i>MoFit</a>
+    <p>تمارين كل عضلة بالفيديو، وجداول التمرين بتاعتك، في مكان واحد.</p>
+  </div>
+</aside>
+
+<main class="auth-main">
+  <a class="logo auth-logo" href="index.html"><i></i>MoFit</a>
+
+  <div class="auth-box">
+    <div class="auth-tabs" role="tablist">
+      <button type="button" role="tab" id="tab-login" aria-selected="true">تسجيل الدخول</button>
+      <button type="button" role="tab" id="tab-signup" aria-selected="false">حساب جديد</button>
+    </div>
+
+    <p class="notice" id="notice" hidden></p>
+
+    <form id="form-login" class="auth-form">
+      <div class="field"><label for="li-email">الإيميل</label><input id="li-email" type="email" autocomplete="email" required dir="ltr"></div>
+      <div class="field"><label for="li-pass">كلمة السر</label><input id="li-pass" type="password" autocomplete="current-password" required dir="ltr"></div>
+      <button class="btn btn-ink" type="submit">دخول</button>
+      <button class="link" type="button" id="forgot">نسيت كلمة السر؟</button>
+    </form>
+
+    <form id="form-signup" class="auth-form" hidden>
+      <div class="field"><label for="su-name">الاسم بالكامل</label><input id="su-name" autocomplete="name" required></div>
+      <div class="field"><label for="su-phone">رقم الموبايل</label><input id="su-phone" type="tel" autocomplete="tel" required dir="ltr" placeholder="01xxxxxxxxx"></div>
+      <div class="field"><label for="su-email">الإيميل</label><input id="su-email" type="email" autocomplete="email" required dir="ltr"></div>
+      <div class="field"><label for="su-pass">كلمة السر</label><input id="su-pass" type="password" autocomplete="new-password" minlength="6" required dir="ltr"><small>٦ حروف أو أرقام على الأقل</small></div>
+      <button class="btn btn-ink" type="submit">اعمل الحساب</button>
+      <p class="hint">بعد ما تعمل الحساب، محمد هيفعّله أول ما اشتراكك يتأكد.</p>
+    </form>
+
+    <form id="form-reset" class="auth-form" hidden>
+      <h2>كلمة سر جديدة</h2>
+      <div class="field"><label for="rs-pass">كلمة السر الجديدة</label><input id="rs-pass" type="password" autocomplete="new-password" minlength="6" required dir="ltr"></div>
+      <button class="btn btn-ink" type="submit">حفظ كلمة السر</button>
+    </form>
+  </div>
+</main>
+
+<script type="module" src="js/login.js"></script>
+</body>
+</html>

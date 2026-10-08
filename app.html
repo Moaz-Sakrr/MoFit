@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>التمارين | MoFit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lalezar&family=Readex+Pro:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- شريط فوق بيظهر على الموبايل بس -->
+  <header class="topbar">
+    <a class="logo" href="index.html"><i></i>MoFit</a>
+    <button class="menu-btn" id="menu-btn" type="button" aria-label="فتح القائمة" aria-controls="sidebar" aria-expanded="false">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+  </header>
+
+  <aside class="sidebar" id="sidebar">
+    <a class="logo" href="index.html"><i></i>MoFit</a>
+    <div class="me"><b id="me-name">…</b><span id="me-status"></span></div>
+
+    <nav class="side-nav" id="side-nav">
+      <a href="#exercises" data-view="exercises">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></svg>التمارين</a>
+      <a href="#programs" data-view="programs">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="17" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>جداول التمرين</a>
+      <a href="#account" data-view="account">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>حسابي</a>
+      <div id="coach-nav" hidden>
+        <p class="group">لوحة الكوتش</p>
+        <a href="#members" data-view="members">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14c2.8 0 4.5 2 4.5 5"/></svg>المتدربين</a>
+      </div>
+    </nav>
+
+    <div class="side-foot side-nav">
+      <a href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>الصفحة الرئيسية</a>
+      <a href="#" id="logout">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 8l-4 4 4 4M6 12h10"/></svg>تسجيل خروج</a>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <main class="main" id="main"><p class="loading">بيحمّل…</p></main>
+</div>
+
+<!-- نافذة فيديو اليوتيوب -->
+<dialog class="video" id="video">
+  <div class="video-bar"><h2 id="video-title"></h2><button type="button" id="video-close">إغلاق</button></div>
+  <div class="video-frame" id="video-frame"></div>
+</dialog>
+
+<!-- نافذة التعديل (للكوتش) -->
+<dialog class="sheet" id="sheet"><form id="sheet-form" method="dialog"></form></dialog>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+/* ألوان وخطوط الموقع كله — غيّر من هنا لو عايز تعدّل الشكل */
+:root{
+  --paper:#e6e5e0; --paper-2:#f1f0ec; --ink:#17191b; --ink-2:#4d5257; --rule:#c8c6be;
+  --night:#15171a; --night-2:#1f2226; --night-ink:#ecebe6; --night-mute:#9a9fa6; --night-rule:#2e3237;
+  --tape:#f2c200; --tape-ink:#17191b;
+  --ok:#1f8a4c; --warn:#b7791f; --bad:#c0392b;
+  --display:"Lalezar","Readex Pro",system-ui,sans-serif;
+  --body:"Readex Pro",system-ui,"Segoe UI",Tahoma,sans-serif;
+  --max:1200px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --paper:#1b1d20; --paper-2:#23262a; --ink:#ecebe6; --ink-2:#a3a8ae; --rule:#34383e;
+  --night:#0f1113; --night-2:#191b1e; --night-rule:#2a2e33;
+  --ok:#3fbf74; --warn:#e0a63a; --bad:#ef6a5b; color-scheme:dark}}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16.5px;line-height:1.75}
+h1,h2,h3{font-family:var(--display);font-weight:400;line-height:1.1;margin:0;text-wrap:balance}
+p{margin:0}
+a{color:inherit}
+img{display:block;max-width:100%}
+button{font:inherit;color:inherit}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--tape);outline-offset:3px}
+.wrap{max-width:var(--max);margin:0 auto;padding-inline:clamp(16px,4vw,40px)}
+
+.logo{font-family:var(--body);font-weight:700;font-size:1.55rem;letter-spacing:-.02em;direction:ltr;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+.logo i{width:12px;height:22px;background:var(--tape);transform:skewX(-14deg)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:2px solid transparent;border-radius:4px;padding:12px 24px;font-weight:600;font-size:.98rem;cursor:pointer;text-decoration:none;line-height:1.2;background:none}
+.btn-tape{background:var(--tape);color:var(--tape-ink)}
+.btn-ghost{border-color:currentColor}
+.btn-ink{background:var(--ink);color:var(--paper)}
+.btn-sm{padding:6px 14px;font-size:.85rem;border-width:1.5px}
+.btn:disabled{opacity:.45;cursor:default}
+
+input,select,textarea{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:10px 12px;width:100%}
+textarea{min-height:110px;line-height:1.7;resize:vertical}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label{font-weight:600;font-size:.9rem}
+.field small{color:var(--ink-2);font-size:.82rem}
+
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
