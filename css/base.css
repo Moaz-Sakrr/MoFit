@@ -43,3 +43,13 @@ textarea{min-height:110px;line-height:1.7;resize:vertical}
 .field small{color:var(--ink-2);font-size:.82rem}
 
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+
+/* ---------- موبايل: مسافات أريح وأزرار سهلة اللمس ---------- */
+@media (max-width:640px){
+  body{font-size:16px}
+  .wrap{padding-inline:20px}
+  .btn{min-height:48px;padding:12px 22px}
+  .btn-sm{min-height:42px;padding:8px 16px}
+  input,select,textarea{min-height:48px;padding:12px 14px}
+  .field{gap:8px}
+}

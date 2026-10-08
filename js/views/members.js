@@ -63,9 +63,9 @@ function draw(main) {
     const left = p.is_active && d !== null ? (d >= 0 ? `فاضل ${d} يوم` : `خلص من ${-d} يوم`) : "";
     return `<tr data-id="${p.id}">
       <td class="who"><b>${esc(p.full_name || "من غير اسم")}</b><span>${esc(p.phone)}</span><br><span>${esc(p.email)}</span></td>
-      <td>${fmt(p.created_at)}</td>
-      <td><input type="date" value="${p.subscription_end || ""}" data-end aria-label="نهاية اشتراك ${esc(p.full_name)}"><span class="days-left">${left}</span></td>
-      <td><span class="pill ${st}">${STATUS_LABEL[st]}</span></td>
+      <td data-label="اتسجّل">${fmt(p.created_at)}</td>
+      <td data-label="نهاية الاشتراك"><input type="date" value="${p.subscription_end || ""}" data-end aria-label="نهاية اشتراك ${esc(p.full_name)}"><span class="days-left">${left}</span></td>
+      <td data-label="الحالة"><span class="pill ${st}">${STATUS_LABEL[st]}</span></td>
       <td><div class="acts">
         ${p.is_active
           ? `<button class="btn btn-ghost btn-sm" type="button" data-toggle>إيقاف</button>`

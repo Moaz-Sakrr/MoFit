@@ -36,6 +36,17 @@ export function openVideo(url, title) {
   dlg.showModal();
 }
 
+// فيديو مرفوع من جهاز الكوتش (رابط مؤقت من Supabase)
+export function openFile(src, title) {
+  document.getElementById("video-title").textContent = title || "";
+  dlg.classList.remove("vertical");
+  frame.innerHTML = "";
+  const v = document.createElement("video");
+  v.src = src; v.controls = true; v.autoplay = true; v.playsInline = true;
+  frame.appendChild(v);
+  dlg.showModal();
+}
+
 // لما النافذة تتقفل نشيل الفيديو عشان الصوت يقف
 dlg.addEventListener("close", () => (frame.innerHTML = ""));
 document.getElementById("video-close").onclick = () => dlg.close();

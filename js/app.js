@@ -5,6 +5,7 @@ import { renderExercises } from "./views/exercises.js";
 import { renderPrograms } from "./views/programs.js";
 import { renderAccount } from "./views/account.js";
 import { renderMembers, memberStatus } from "./views/members.js";
+import { renderResults } from "./views/results.js";
 
 const $ = (id) => document.getElementById(id);
 const main = $("main");
@@ -41,7 +42,7 @@ function route() {
   const myId = ++routeId;
   const isCoach = profile.role === "coach";
   let view = location.hash.slice(1) || (isCoach ? "members" : "exercises");
-  if (view === "members" && !isCoach) view = "exercises";
+  if ((view === "members" || view === "results") && !isCoach) view = "exercises";
 
   document.querySelectorAll("#side-nav a").forEach((a) => {
     if (a.dataset.view === view) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
@@ -52,6 +53,7 @@ function route() {
   const ctx = { profile, isCoach, stale: () => myId !== routeId, onProfileChange: (p) => { profile = p; drawSidebar(); } };
   if (view === "account") return renderAccount(main, ctx);
   if (view === "members") return renderMembers(main, ctx);
+  if (view === "results") return renderResults(main, ctx);
   if (!canTrain()) return drawLocked();
   if (view === "programs") return renderPrograms(main, ctx);
   return renderExercises(main, ctx);

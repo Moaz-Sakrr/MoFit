@@ -25,6 +25,7 @@ export function openSheet({ title, fields, values = {}, saveLabel = "حفظ", on
     let input;
     if (f.type === "textarea") input = `<textarea id="${id}" name="${f.k}" class="${f.tall ? "tall" : ""}"${dir}${req}>${esc(v)}</textarea>`;
     else if (f.type === "select") input = `<select id="${id}" name="${f.k}">${f.options.map(([ov, ol]) => `<option value="${esc(ov)}"${String(v) === String(ov) ? " selected" : ""}>${esc(ol)}</option>`).join("")}</select>`;
+    else if (f.type === "file") input = `<input id="${id}" name="${f.k}" type="file" accept="${f.accept || "image/*"}"${req}>`;
     else input = `<input id="${id}" name="${f.k}" type="${f.type || "text"}" value="${esc(v)}" placeholder="${esc(f.ph || "")}"${dir}${req}>`;
     return `<div class="field"><label for="${id}">${esc(f.label)}</label>${input}${f.hint ? `<small>${esc(f.hint)}</small>` : ""}</div>`;
   }).join("");
@@ -35,15 +36,16 @@ export function openSheet({ title, fields, values = {}, saveLabel = "حفظ", on
   form.onsubmit = async (e) => {
     e.preventDefault();
     const out = {};
-    fields.forEach((f) => (out[f.k] = form.elements[f.k].value.trim()));
+    fields.forEach((f) => { const el = form.elements[f.k]; out[f.k] = f.type === "file" ? (el.files[0] || null) : el.value.trim(); });
     const btn = e.submitter; btn.disabled = true;
+    const label = btn.textContent; btn.textContent = "جاري الحفظ…";
     try { await onSave(out); dlg.close(); }
     catch (err) {
       const box = form.querySelector("#sheet-err");
       box.textContent = "ما اتحفظش: " + (err.message || err);
       box.hidden = false;
     }
-    btn.disabled = false;
+    btn.disabled = false; btn.textContent = label;
   };
   dlg.showModal();
   form.querySelector("input,textarea")?.focus();

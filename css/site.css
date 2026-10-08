@@ -89,3 +89,39 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;
 footer .logo{color:var(--night-ink);font-size:1.2rem}
 
 .compare:focus-within{outline:3px solid var(--tape);outline-offset:3px}
+
+/* ---------- موبايل ---------- */
+@media (max-width:640px){
+  .nav{background:linear-gradient(to bottom,rgb(10 11 12/.8),rgb(10 11 12/0))}
+  .nav .wrap{min-height:64px}
+  .hero-copy .inner{gap:18px}
+  .cta-row{gap:10px}
+  .cta-row .btn{flex:1 1 150px}
+  .tape .wrap{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-block:22px;text-align:center}
+  .tape .s{flex-direction:column;align-items:center;gap:4px}
+  .tape b{font-size:1.9rem}
+  .tape span{font-size:.8rem;line-height:1.4}
+  .about{padding-block:56px}
+  .about .wrap{gap:36px}
+  .pair{gap:12px}
+  .pair .p2{margin-bottom:28px}
+  .about .text{gap:16px}
+  .points li{padding:16px 0}
+  .results{padding-block:56px}
+  .head{margin-bottom:28px}
+  .res-grid{gap:32px}
+  .members-cta{padding-block:56px}
+  .members-cta .wrap{gap:24px}
+  .members-cta .actions .btn{flex:1 1 100%}
+  .contact{padding-block:56px}
+  .contact .wrap{gap:28px}
+  .line{padding:18px 0}
+  .line b{font-size:1.3rem}
+  footer .wrap{justify-content:center;text-align:center}
+}
+
+/* اللوجو في عنوان الهيرو */
+.hero h1 .logo{font-size:1em;gap:.1em;font-weight:700;letter-spacing:-.03em}
+.hero h1 .logo i{width:.16em;height:.7em}
+.line .ico{display:inline-flex;width:40px;height:40px}
+.line .ico svg{width:100%;height:100%}

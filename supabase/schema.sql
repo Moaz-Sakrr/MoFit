@@ -129,6 +129,57 @@ create policy "programs write" on public.programs for all    using (public.is_co
 alter table public.programs drop constraint if exists programs_days_is_array;
 alter table public.programs add constraint programs_days_is_array check (jsonb_typeof(days) = 'array');
 
+-- 7.5) نتايج المشتركين (صور قبل وبعد) -------------------------------------
+-- الصفحة الرئيسية بتقراها لأي زائر، والكوتش بس هو اللي يعدّل
+create table if not exists public.results (
+  id         bigint generated always as identity primary key,
+  title      text not null default '',
+  goal       text not null default '',
+  before_url text not null,
+  after_url  text not null,
+  sort       int  not null default 0,
+  created_at timestamptz not null default now()
+);
+alter table public.results enable row level security;
+drop policy if exists "results read"  on public.results;
+drop policy if exists "results write" on public.results;
+create policy "results read"  on public.results for select using (true);
+create policy "results write" on public.results for all using (public.is_coach()) with check (public.is_coach());
+
+-- مخزن الصور: القراءة للكل، والرفع والحذف للكوتش بس
+insert into storage.buckets (id, name, public) values ('results', 'results', true)
+on conflict (id) do nothing;
+drop policy if exists "results files insert" on storage.objects;
+drop policy if exists "results files update" on storage.objects;
+drop policy if exists "results files delete" on storage.objects;
+create policy "results files insert" on storage.objects for insert with check (bucket_id = 'results' and public.is_coach());
+create policy "results files update" on storage.objects for update using (bucket_id = 'results' and public.is_coach());
+create policy "results files delete" on storage.objects for delete using (bucket_id = 'results' and public.is_coach());
+
+insert into public.results (title, goal, before_url, after_url, sort)
+select * from (values
+  ('متدرب ١','تنشيف','images/result-1-before.jpg','images/result-1-after.jpg',1),
+  ('متدرب ٢','تضخيم','images/result-2-before.jpg','images/result-2-after.jpg',2),
+  ('متدرب ٣','تضخيم','images/result-3-before.jpg','images/result-3-after.jpg',3)
+) as v(title,goal,before_url,after_url,sort)
+where not exists (select 1 from public.results);
+
+-- 7.6) فيديوهات التمارين المرفوعة من جهاز الكوتش -------------------------
+alter table public.exercises add column if not exists video_path text not null default '';
+
+-- مخزن خاص: المتدرب المفعّل والكوتش بس يشوفوا الفيديو. الحد 50 ميجا (حد الخطة المجانية)
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('exercise-videos', 'exercise-videos', false, 52428800, array['video/mp4','video/webm','video/quicktime'])
+on conflict (id) do update set file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
+drop policy if exists "videos read"   on storage.objects;
+drop policy if exists "videos insert" on storage.objects;
+drop policy if exists "videos update" on storage.objects;
+drop policy if exists "videos delete" on storage.objects;
+create policy "videos read"   on storage.objects for select using (bucket_id = 'exercise-videos' and (public.is_coach() or public.is_active_member()));
+create policy "videos insert" on storage.objects for insert with check (bucket_id = 'exercise-videos' and public.is_coach());
+create policy "videos update" on storage.objects for update using (bucket_id = 'exercise-videos' and public.is_coach());
+create policy "videos delete" on storage.objects for delete using (bucket_id = 'exercise-videos' and public.is_coach());
+
 -- 8) بيانات بداية (أمثلة تقدر تعدّلها أو تمسحها من لوحة الكوتش) ----------
 insert into public.exercises (muscle, name, sets, reps, cues, sort)
 select * from (values
