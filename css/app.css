@@ -1,34 +1,40 @@
 /* صفحة الدخول + صفحة المتدربين (السايد بار والتمارين ولوحة الكوتش) */
 
-/* ---------- صفحة الدخول ---------- */
-.auth-page{display:grid;grid-template-columns:1fr minmax(0,560px);min-height:100vh}
-.auth-photo{position:relative;background:var(--night);overflow:hidden}
-.auth-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:75% 30%;opacity:.85}
-.auth-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgb(10 11 12/.9),rgb(10 11 12/0) 55%)}
-.auth-photo-copy{position:absolute;z-index:1;inset-inline:40px;bottom:40px;color:#fff;display:flex;flex-direction:column;gap:12px}
-.auth-photo-copy .logo{font-size:2rem}
-.auth-photo-copy p{max-width:36ch;opacity:.85}
-.auth-main{display:flex;flex-direction:column;justify-content:center;padding:40px clamp(16px,5vw,64px);gap:28px}
-.auth-logo{display:none}
-.auth-box{display:flex;flex-direction:column;gap:20px;width:100%;max-width:420px}
-.auth-tabs{display:flex;gap:24px;border-bottom:1px solid var(--rule)}
-.auth-tabs button{border:0;background:none;cursor:pointer;font-family:var(--display);font-size:1.7rem;padding:4px 0 10px;color:var(--ink-2);opacity:.6;position:relative}
-.auth-tabs button[aria-selected="true"]{opacity:1;color:var(--ink)}
-.auth-tabs button[aria-selected="true"]::after{content:"";position:absolute;inset-inline:0;bottom:-1px;height:5px;background:var(--tape)}
-.auth-form{display:flex;flex-direction:column;gap:16px}
-.auth-form h2{font-size:2rem}
-.auth-form .btn{margin-top:4px}
-.link{border:0;background:none;cursor:pointer;color:var(--ink-2);text-decoration:underline;text-underline-offset:4px;padding:0;width:fit-content;font-size:.9rem}
-.hint{font-size:.88rem;color:var(--ink-2)}
-.notice{padding:12px 14px;border-radius:6px;font-size:.92rem;border-inline-start:4px solid var(--ink-2);background:var(--paper-2)}
-.notice.ok{border-color:var(--ok)}
-.notice.bad{border-color:var(--bad)}
-@media (max-width:860px){
-  .auth-page{grid-template-columns:1fr}
-  .auth-photo{display:none}
-  .auth-logo{display:inline-flex}
-  .auth-main{justify-content:flex-start;padding-top:48px}
+/* ---------- صفحة الدخول (زجاجية) ---------- */
+.auth-page{min-height:100vh;min-height:100dvh;display:grid;place-items:center;position:relative;background:var(--night);color:#fff}
+.auth-photo{position:fixed;inset:0;overflow:hidden;z-index:0}
+.auth-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:75% 30%}
+.auth-photo::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at center,rgb(10 11 12/.25),rgb(10 11 12/.7)),linear-gradient(to top,rgb(10 11 12/.55),rgb(10 11 12/.1))}
+.auth-main{position:relative;z-index:1;width:100%;display:grid;place-items:center;padding:32px 20px}
+.auth-box{
+  --ink:#fff;--ink-2:rgb(255 255 255/.74);--rule:rgb(255 255 255/.28);--paper:rgb(255 255 255/.1);--paper-2:rgb(255 255 255/.12);
+  display:flex;flex-direction:column;gap:22px;width:100%;max-width:440px;padding:34px 30px;color:#fff;
+  background:rgb(18 20 23/.7);border:1px solid rgb(255 255 255/.2);border-radius:22px;
+  box-shadow:0 24px 70px rgb(0 0 0/.5),inset 0 1px 0 rgb(255 255 255/.18)}
+@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .auth-box{background:rgb(255 255 255/.1);-webkit-backdrop-filter:blur(22px) saturate(1.4);backdrop-filter:blur(22px) saturate(1.4)}
 }
+.auth-brand{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.auth-brand .logo{font-size:2rem;color:#fff}
+.auth-brand p{font-size:.92rem;color:var(--ink-2);max-width:32ch}
+.auth-tabs{display:flex;justify-content:center;gap:28px;border-bottom:1px solid var(--rule)}
+.auth-tabs button{border:0;background:none;cursor:pointer;font-family:var(--display);font-size:1.6rem;padding:4px 0 10px;color:#fff;opacity:.55;position:relative}
+.auth-tabs button[aria-selected="true"]{opacity:1}
+.auth-tabs button[aria-selected="true"]::after{content:"";position:absolute;inset-inline:0;bottom:-1px;height:4px;background:var(--tape);border-radius:2px}
+.auth-form{display:flex;flex-direction:column;gap:16px}
+.auth-form h2{font-size:2rem;text-align:center}
+.auth-form .btn{margin-top:4px}
+.auth-box input{background:rgb(255 255 255/.1);border:1px solid rgb(255 255 255/.28);color:#fff;border-radius:10px}
+.auth-box input::placeholder{color:rgb(255 255 255/.45)}
+.auth-box input:focus{background:rgb(255 255 255/.16);border-color:var(--tape);outline:none}
+.auth-box input:-webkit-autofill{-webkit-text-fill-color:#fff;transition:background-color 9999s}
+.auth-box .btn{border-radius:10px}
+.auth-box .btn-ink{background:var(--tape);color:var(--tape-ink)}
+.link{border:0;background:none;cursor:pointer;color:rgb(255 255 255/.8);text-decoration:underline;text-underline-offset:4px;padding:0;width:fit-content;font-size:.9rem;align-self:center}
+.hint{font-size:.88rem;color:var(--ink-2);text-align:center}
+.notice{padding:12px 14px;border-radius:10px;font-size:.92rem;border-inline-start:4px solid var(--ink-2);background:var(--paper-2)}
+.notice.ok{border-color:#5ee09a}
+.notice.bad{border-color:#ff8a7a}
 
 /* ---------- الهيكل: سايد بار + محتوى ---------- */
 .app{display:grid;grid-template-columns:270px minmax(0,1fr);min-height:100vh}
@@ -192,10 +198,23 @@ textarea.tall{min-height:240px}
 
 /* ---------- موبايل ---------- */
 @media (max-width:640px){
-  .auth-main{padding:28px 20px 48px;gap:24px}
-  .auth-box{gap:24px;max-width:none}
-  .auth-form{gap:18px}
-  .auth-tabs{gap:28px}
+  /* الشريحة تنزل لتحت وتسيب الصورة ظاهرة فوق */
+  .auth-photo img{object-position:68% 15%}
+  .auth-photo::after{background:linear-gradient(to top,rgb(10 11 12/.55),rgb(10 11 12/0) 60%)}
+  .auth-main{min-height:100vh;min-height:100dvh;align-content:end;padding:10vh 12px 12px}
+  .auth-box{padding:20px 18px 22px;border-radius:20px;gap:14px;background:rgb(18 20 23/.55)}
+  .auth-brand{flex-direction:row;justify-content:center}
+  .auth-brand p{display:none}
+  .auth-brand .logo{font-size:1.7rem}
+  .auth-tabs{gap:24px}
+  .auth-tabs button{font-size:1.4rem;padding-bottom:8px}
+  .auth-form{gap:12px}
+  .auth-form .field{gap:5px}
+  .auth-form .field label{font-size:.85rem}
+  .auth-box input{min-height:44px;padding:9px 12px}
+  .auth-box .btn{min-height:46px;margin-top:2px}
+  .auth-form h2{font-size:1.6rem}
+  .hint{font-size:.8rem}
 
   .side-nav a{padding:13px 12px}
   .main{padding:24px 16px 96px}
