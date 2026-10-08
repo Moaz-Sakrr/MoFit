@@ -18,7 +18,7 @@
 .auth-brand .logo{font-size:2rem;color:#fff}
 .auth-brand p{font-size:.92rem;color:var(--ink-2);max-width:32ch}
 .auth-tabs{display:flex;justify-content:center;gap:28px;border-bottom:1px solid var(--rule)}
-.auth-tabs button{border:0;background:none;cursor:pointer;font-family:var(--display);font-size:1.6rem;padding:4px 0 10px;color:#fff;opacity:.55;position:relative}
+.auth-tabs button{border:0;background:none;cursor:pointer;font-family:var(--display);font-weight:700;font-size:1.6rem;padding:4px 0 10px;color:#fff;opacity:.55;position:relative}
 .auth-tabs button[aria-selected="true"]{opacity:1}
 .auth-tabs button[aria-selected="true"]::after{content:"";position:absolute;inset-inline:0;bottom:-1px;height:4px;background:var(--tape);border-radius:2px}
 .auth-form{display:flex;flex-direction:column;gap:16px}
@@ -77,8 +77,8 @@
 
 /* ---------- التمارين ---------- */
 .index{display:flex;flex-wrap:wrap;gap:6px 28px;border-bottom:1px solid var(--rule);margin-bottom:8px}
-.mt{border:0;background:none;cursor:pointer;font-family:var(--display);font-size:clamp(1.5rem,3.2vw,2.2rem);line-height:1.2;color:var(--ink-2);opacity:.55;padding:6px 0 12px;position:relative;display:flex;align-items:flex-start;gap:6px}
-.mt sup{font-family:var(--body);font-size:.8rem;font-weight:600;margin-top:6px}
+.mt{border:0;background:none;cursor:pointer;font-family:var(--display);font-weight:700;font-size:clamp(1.5rem,3.2vw,2.2rem);line-height:1.2;color:var(--ink-2);opacity:.55;padding:6px 0 12px;position:relative;display:flex;align-items:flex-start;gap:6px}
+.mt sup{font-family:var(--latin);font-size:.8rem;font-weight:600;margin-top:6px}
 .mt:hover{opacity:.85}
 .mt[aria-selected="true"]{color:var(--ink);opacity:1}
 .mt[aria-selected="true"]::after{content:"";position:absolute;inset-inline:0;bottom:-1px;height:5px;background:var(--tape)}

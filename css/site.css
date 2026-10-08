@@ -32,7 +32,7 @@
 }
 
 .tape{background:var(--tape);color:var(--tape-ink)}
-.tape .wrap{display:flex;flex-wrap:wrap;gap:12px 48px;align-items:baseline;padding-block:20px}
+.tape .wrap{display:flex;flex-wrap:wrap;gap:12px clamp(32px,7vw,96px);align-items:baseline;justify-content:center;padding-block:22px}
 .tape .s{display:flex;align-items:baseline;gap:10px}
 .tape b{font-weight:700;font-size:2.1rem;line-height:1;font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}
 .tape span{font-size:.95rem;font-weight:500}
@@ -125,3 +125,7 @@ footer .logo{color:var(--night-ink);font-size:1.2rem}
 .hero h1 .logo i{width:.16em;height:.7em}
 .line .ico{display:inline-flex;width:40px;height:40px}
 .line .ico svg{width:100%;height:100%}
+
+/* الأرقام والشعار بخط ضيق ومائل زي إعلانات الجيم */
+.tape b,.line b{font-family:var(--latin);font-style:italic;font-weight:700;letter-spacing:.01em}
+@media (min-width:641px){.tape b{font-size:2.4rem}}
