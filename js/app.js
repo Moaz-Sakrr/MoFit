@@ -1,6 +1,7 @@
 // صفحة المتدربين: بتتأكد إنك داخل، وبتعرض الصفحة المناسبة من السايد بار
 import { supabase, getCurrentProfile, isConfigured, esc } from "./supabase.js";
 import { COACH_WHATSAPP } from "./config.js";
+import "./pwa.js";
 import { renderExercises } from "./views/exercises.js";
 import { renderPrograms } from "./views/programs.js";
 import { renderAccount } from "./views/account.js";
