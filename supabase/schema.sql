@@ -180,6 +180,61 @@ create policy "videos insert" on storage.objects for insert with check (bucket_i
 create policy "videos update" on storage.objects for update using (bucket_id = 'exercise-videos' and public.is_coach());
 create policy "videos delete" on storage.objects for delete using (bucket_id = 'exercise-videos' and public.is_coach());
 
+-- 7.7) صور متابعة المتدربين ------------------------------------------------
+-- المتدرب يرفع من 1 لـ 3 صور أول الشهر وآخره. الكوتش يشوفها دايماً للمتابعة،
+-- و allow_public هو قرار المتدرب: هل يسمح باستخدامها في نتايج المشتركين؟
+create table if not exists public.progress_photos (
+  id           bigint generated always as identity primary key,
+  member_id    uuid not null default auth.uid() references public.profiles(id) on delete cascade,
+  period       text not null check (period in ('start','end')),
+  month        date not null,
+  paths        text[] not null check (cardinality(paths) between 1 and 3),
+  allow_public boolean not null default false,
+  created_at   timestamptz not null default now()
+);
+create index if not exists progress_photos_member_idx on public.progress_photos (member_id, month desc);
+alter table public.progress_photos enable row level security;
+
+-- المتدرب يعدّل قراره بس، مش الصور ولا التاريخ ولا صاحب الصف
+create or replace function public.protect_progress_photo()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  new.id         := old.id;
+  new.member_id  := old.member_id;
+  new.period     := old.period;
+  new.month      := old.month;
+  new.paths      := old.paths;
+  new.created_at := old.created_at;
+  return new;
+end $$;
+drop trigger if exists protect_progress_photo on public.progress_photos;
+create trigger protect_progress_photo before update on public.progress_photos
+  for each row execute function public.protect_progress_photo();
+
+-- القراءة: صاحب الصور والكوتش. الرفع: المتدرب المفعّل. التعديل والحذف: صاحب الصور بس
+drop policy if exists "photos read"   on public.progress_photos;
+drop policy if exists "photos insert" on public.progress_photos;
+drop policy if exists "photos update" on public.progress_photos;
+drop policy if exists "photos delete" on public.progress_photos;
+create policy "photos read"   on public.progress_photos for select using (member_id = auth.uid() or public.is_coach());
+create policy "photos insert" on public.progress_photos for insert with check (member_id = auth.uid() and public.is_active_member());
+create policy "photos update" on public.progress_photos for update using (member_id = auth.uid()) with check (member_id = auth.uid());
+create policy "photos delete" on public.progress_photos for delete using (member_id = auth.uid());
+
+-- مخزن خاص: كل متدرب في فولدر باسم رقمه (uid). الحد 5 ميجا للصورة
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('progress-photos', 'progress-photos', false, 5242880, array['image/jpeg'])
+on conflict (id) do update set file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
+drop policy if exists "progress files read"   on storage.objects;
+drop policy if exists "progress files insert" on storage.objects;
+drop policy if exists "progress files delete" on storage.objects;
+create policy "progress files read"   on storage.objects for select
+  using (bucket_id = 'progress-photos' and ((storage.foldername(name))[1] = auth.uid()::text or public.is_coach()));
+create policy "progress files insert" on storage.objects for insert
+  with check (bucket_id = 'progress-photos' and (storage.foldername(name))[1] = auth.uid()::text and public.is_active_member());
+create policy "progress files delete" on storage.objects for delete
+  using (bucket_id = 'progress-photos' and (storage.foldername(name))[1] = auth.uid()::text);
+
 -- 8) بيانات بداية (أمثلة تقدر تعدّلها أو تمسحها من لوحة الكوتش) ----------
 insert into public.exercises (muscle, name, sets, reps, cues, sort)
 select * from (values

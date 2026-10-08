@@ -6,6 +6,8 @@ import { renderPrograms } from "./views/programs.js";
 import { renderAccount } from "./views/account.js";
 import { renderMembers, memberStatus } from "./views/members.js";
 import { renderResults } from "./views/results.js";
+import { renderPhotos } from "./views/photos.js";
+import { renderProgress } from "./views/progress.js";
 
 const $ = (id) => document.getElementById(id);
 const main = $("main");
@@ -32,6 +34,7 @@ function drawSidebar() {
   $("me-name").textContent = profile.full_name || profile.email;
   $("me-status").innerHTML = `<span class="pill ${st}">${STATUS_LABEL[st]}</span>`;
   $("coach-nav").hidden = profile.role !== "coach";
+  $("photos-nav").hidden = profile.role === "coach";
 }
 
 // هل المتدرب يقدر يشوف التمارين والجداول؟
@@ -42,7 +45,8 @@ function route() {
   const myId = ++routeId;
   const isCoach = profile.role === "coach";
   let view = location.hash.slice(1) || (isCoach ? "members" : "exercises");
-  if ((view === "members" || view === "results") && !isCoach) view = "exercises";
+  if (["members", "results", "progress"].includes(view) && !isCoach) view = "exercises";
+  if (view === "photos" && isCoach) view = "progress";
 
   document.querySelectorAll("#side-nav a").forEach((a) => {
     if (a.dataset.view === view) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
@@ -54,6 +58,8 @@ function route() {
   if (view === "account") return renderAccount(main, ctx);
   if (view === "members") return renderMembers(main, ctx);
   if (view === "results") return renderResults(main, ctx);
+  if (view === "progress") return renderProgress(main, ctx);
+  if (view === "photos") return renderPhotos(main, ctx);
   if (!canTrain()) return drawLocked();
   if (view === "programs") return renderPrograms(main, ctx);
   return renderExercises(main, ctx);

@@ -1,6 +1,7 @@
 // نتايج المشتركين (صور قبل وبعد): الكوتش يضيف ويعدّل ويحذف، والصفحة الرئيسية بتعرضهم
 import { supabase, esc } from "../supabase.js";
 import { toast, openSheet, confirmSheet } from "../ui.js";
+import { compressImage } from "../images.js";
 
 const BUCKET = "results";
 let list = [];
@@ -14,18 +15,8 @@ export async function renderResults(main, { stale }) {
   draw(main);
 }
 
-// نصغّر الصورة قبل الرفع عشان الصفحة الرئيسية تفضل خفيفة
-async function compress(file) {
-  const bmp = await createImageBitmap(file);
-  const s = Math.min(1, 1200 / Math.max(bmp.width, bmp.height));
-  const c = document.createElement("canvas");
-  c.width = Math.round(bmp.width * s); c.height = Math.round(bmp.height * s);
-  c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
-  return new Promise((ok, no) => c.toBlob((b) => (b ? ok(b) : no(new Error("الصورة مش مقروءة"))), "image/jpeg", 0.82));
-}
-
 async function upload(file) {
-  const blob = await compress(file);
+  const blob = await compressImage(file);
   const path = crypto.randomUUID() + ".jpg";
   const { error } = await supabase.storage.from(BUCKET).upload(path, blob, { contentType: "image/jpeg", cacheControl: "31536000" });
   if (error) throw error;
