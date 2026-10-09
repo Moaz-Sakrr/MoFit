@@ -1,13 +1,13 @@
 // نتايج المشتركين (صور قبل وبعد): الكوتش يضيف ويعدّل ويحذف، والصفحة الرئيسية بتعرضهم
 import { supabase, esc } from "../supabase.js";
-import { toast, openSheet, confirmSheet } from "../ui.js";
+import { toast, openSheet, confirmSheet, loadingView } from "../ui.js";
 import { compressImage } from "../images.js";
 
 const BUCKET = "results";
 let list = [];
 
 export async function renderResults(main, { stale }) {
-  main.innerHTML = `<p class="loading">بيحمّل النتايج…</p>`;
+  main.innerHTML = `${loadingView("cards")}`;
   const { data, error } = await supabase.from("results").select("*").order("sort").order("id");
   if (stale()) return;
   if (error) { main.innerHTML = `<div class="empty">ما قدرناش نجيب النتايج: ${esc(error.message)}</div>`; return; }

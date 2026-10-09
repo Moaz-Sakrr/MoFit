@@ -1,7 +1,7 @@
 // صفحة التمارين: متقسمة على العضلات، وكل تمرين معاه فيديو يتفتح جوه الموقع
 import { supabase, esc } from "../supabase.js";
 import { youtubeId, thumbnail, openVideo, openFile } from "../youtube.js";
-import { toast, openSheet, confirmSheet } from "../ui.js";
+import { toast, openSheet, confirmSheet, loadingView } from "../ui.js";
 
 export const MUSCLES = [
   ["chest", "الصدر"], ["back", "الضهر"], ["shoulders", "الأكتاف"],
@@ -14,7 +14,7 @@ let muscle = "chest";
 let list = [];
 
 export async function renderExercises(main, { isCoach, stale }) {
-  main.innerHTML = `<p class="loading">بيحمّل التمارين…</p>`;
+  main.innerHTML = `${loadingView("rows")}`;
   const { data, error } = await supabase.from("exercises").select("*").order("sort").order("id");
   if (stale()) return;
   if (error) { main.innerHTML = `<div class="empty">ما قدرناش نجيب التمارين: ${esc(error.message)}</div>`; return; }

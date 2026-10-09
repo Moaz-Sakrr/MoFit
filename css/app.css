@@ -209,6 +209,23 @@ textarea.tall{min-height:240px}
 .view-head + .notice,.notice + .notice{margin-bottom:16px}
 .ph-filter button:first-child{grid-column:auto}
 
+/* ---------- هيكل التحميل ---------- */
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.sk{display:block;border-radius:6px;background:linear-gradient(90deg,var(--sk-a) 25%,var(--sk-b) 50%,var(--sk-a) 75%);background-size:300% 100%;animation:sk 1.5s ease-in-out infinite}
+.sk-view{--sk-a:color-mix(in srgb,var(--ink) 7%,var(--paper));--sk-b:color-mix(in srgb,var(--ink) 14%,var(--paper))}
+.sk-head{display:flex;flex-direction:column;gap:14px;margin-bottom:28px}
+.sk-title{height:42px;width:min(260px,60%)}
+.sk-line{height:14px;width:100%}
+.sk-line.w60{width:60%}
+.sk-line.w40{width:40%}
+.sk-head .sk-line{max-width:420px}
+.sk-thumb{aspect-ratio:16/9;width:100%}
+.sk-img{aspect-ratio:8/5;width:100%}
+.sk-list{display:flex;flex-direction:column;gap:14px}
+.sk-block{height:76px;border-radius:8px}
+.sk-view .row-body{gap:10px}
+@keyframes sk{from{background-position:100% 0}to{background-position:-100% 0}}
+
 .video-frame video{position:absolute;inset:0;width:100%;height:100%;background:#000;object-fit:contain}
 .thumb.upload{background:var(--night);display:grid;place-items:center}
 .thumb.upload .play{background:none}

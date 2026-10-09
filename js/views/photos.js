@@ -1,6 +1,6 @@
 // صوري: المتدرب يرفع صوره أول الشهر وآخره، ويقرر هل المدرب يقدر يستخدمها في نتايج المشتركين
 import { supabase, esc, today } from "../supabase.js";
-import { toast, openSheet, confirmSheet } from "../ui.js";
+import { toast, openSheet, confirmSheet, loadingView } from "../ui.js";
 import { compressImage } from "../images.js";
 import { memberStatus } from "./members.js";
 
@@ -20,7 +20,7 @@ let list = [];
 let urls = {};
 
 export async function renderPhotos(main, ctx) {
-  main.innerHTML = `<p class="loading">بيحمّل صورك…</p>`;
+  main.innerHTML = `${loadingView("cards")}`;
   const { data, error } = await supabase.from("progress_photos").select("*").eq("member_id", ctx.profile.id)
     .order("month", { ascending: false }).order("created_at", { ascending: false });
   if (ctx.stale()) return;

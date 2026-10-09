@@ -1,6 +1,6 @@
 // صور المتدربين (للكوتش): كل الصور للمتابعة، وعلامة على اللي وافق صاحبها يستخدمها في الموقع
 import { supabase, esc } from "../supabase.js";
-import { toast } from "../ui.js";
+import { toast, loadingView } from "../ui.js";
 import { BUCKET, PERIOD_LABEL, monthLabel, signPaths } from "./photos.js";
 
 let list = [];
@@ -8,7 +8,7 @@ let urls = {};
 let onlyAllowed = false;
 
 export async function renderProgress(main, { stale }) {
-  main.innerHTML = `<p class="loading">بيحمّل الصور…</p>`;
+  main.innerHTML = `${loadingView("cards")}`;
   const { data, error } = await supabase.from("progress_photos").select("*, profiles(full_name,email)")
     .order("created_at", { ascending: false }).limit(200);
   if (stale()) return;

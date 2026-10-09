@@ -1,6 +1,6 @@
 // لوحة الكوتش: كل حسابات المتدربين، وتفعيل أو إيقاف أي حد، وتحديد نهاية الاشتراك
 import { supabase, esc, today } from "../supabase.js";
-import { toast } from "../ui.js";
+import { toast, loadingView } from "../ui.js";
 
 let list = [];
 let filter = "all";
@@ -38,7 +38,7 @@ function addMonths(from, n) {
 const fmt = (iso) => iso ? new Date(iso).toLocaleDateString("ar-EG", { day: "numeric", month: "short", year: "numeric" }) : "—";
 
 export async function renderMembers(main, { stale }) {
-  main.innerHTML = `<p class="loading">بيحمّل المتدربين…</p>`;
+  main.innerHTML = `${loadingView("list")}`;
   const { data, error } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
   if (stale()) return;
   if (error) { main.innerHTML = `<div class="empty">ما قدرناش نجيب الحسابات: ${esc(error.message)}</div>`; return; }

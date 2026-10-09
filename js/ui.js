@@ -56,6 +56,19 @@ export function openSheet({ title, fields, values = {}, saveLabel = "حفظ", on
   form.querySelector("input,textarea")?.focus();
 }
 
+// هيكل رمادي متحرك بيظهر لحد ما البيانات توصل. kind: rows (تمارين) | cards (كروت وصور) | list (متدربين)
+const sk = (cls) => `<span class="sk ${cls}"></span>`;
+const times = (n, fn) => Array.from({ length: n }, fn).join("");
+export function loadingView(kind = "rows") {
+  const head = `<div class="sk-head">${sk("sk-title")}${sk("sk-line w60")}</div>`;
+  const body = kind === "cards"
+    ? `<div class="res-admin-grid">${times(3, () => `<div class="res-admin">${sk("sk-img")}${sk("sk-line w60")}${sk("sk-line w40")}</div>`)}</div>`
+    : kind === "list"
+      ? `<div class="sk-list">${times(5, () => sk("sk-block"))}</div>`
+      : `<ul class="rows">${times(4, () => `<li class="row">${sk("sk-thumb")}<div class="row-body">${sk("sk-line w60")}${sk("sk-line")}${sk("sk-line w40")}</div></li>`)}</ul>`;
+  return `<div class="sk-view" role="status" aria-label="بيحمّل"><span class="sr-only">بيحمّل…</span>${head}${body}</div>`;
+}
+
 // نافذة تأكيد بسيطة (بدل confirm)
 export function confirmSheet(title, text, onYes, yesLabel = "احذف") {
   const dlg = document.getElementById("sheet");

@@ -1,12 +1,12 @@
 // صفحة جداول التمرين
 import { supabase, esc } from "../supabase.js";
-import { toast, openSheet, confirmSheet } from "../ui.js";
+import { toast, openSheet, confirmSheet, loadingView } from "../ui.js";
 
 const LEVELS = { 1: "مبتدئ", 2: "متوسط", 3: "متقدم" };
 let list = [];
 
 export async function renderPrograms(main, { isCoach, stale }) {
-  main.innerHTML = `<p class="loading">بيحمّل الجداول…</p>`;
+  main.innerHTML = `${loadingView("cards")}`;
   const { data, error } = await supabase.from("programs").select("*").order("sort").order("id");
   if (stale()) return;
   if (error) { main.innerHTML = `<div class="empty">ما قدرناش نجيب الجداول: ${esc(error.message)}</div>`; return; }
