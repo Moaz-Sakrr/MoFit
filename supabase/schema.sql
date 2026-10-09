@@ -235,6 +235,28 @@ create policy "progress files insert" on storage.objects for insert
 create policy "progress files delete" on storage.objects for delete
   using (bucket_id = 'progress-photos' and (storage.foldername(name))[1] = auth.uid()::text);
 
+-- 7.8) تشديد صور المتابعة -----------------------------------------------------
+-- (أ) كل مسارات الصور لازم تكون جوه فولدر صاحب الصف نفسه
+create or replace function public.paths_belong(owner uuid, p text[])
+returns boolean language sql immutable as $$
+  select coalesce(bool_and(x like owner::text || '/%' and x not like '%..%'), true) from unnest(p) as x;
+$$;
+alter table public.progress_photos drop constraint if exists progress_photos_paths_owner;
+alter table public.progress_photos add constraint progress_photos_paths_owner check (public.paths_belong(member_id, paths));
+
+-- (ب) حد أقصى لعدد الرفعات في الشهر (يمنع ملء المخزن)
+create or replace function public.limit_progress_uploads()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if (select count(*) from progress_photos where member_id = new.member_id and month = new.month) >= 10 then
+    raise exception 'وصلت للحد الأقصى من رفعات الصور في الشهر ده';
+  end if;
+  return new;
+end $$;
+drop trigger if exists limit_progress_uploads on public.progress_photos;
+create trigger limit_progress_uploads before insert on public.progress_photos
+  for each row execute function public.limit_progress_uploads();
+
 -- 8) بيانات بداية (أمثلة تقدر تعدّلها أو تمسحها من لوحة الكوتش) ----------
 insert into public.exercises (muscle, name, sets, reps, cues, sort)
 select * from (values

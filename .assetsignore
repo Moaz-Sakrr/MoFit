@@ -1,0 +1,10 @@
+# ملفات مش لازم تتنشر مع الموقع (Cloudflare بيرفع كل الفولدر وده كان بيعرض .git والـ SQL)
+.git
+.gitignore
+.assetsignore
+.wrangler
+node_modules
+wrangler.jsonc
+wrangler.toml
+README.md
+supabase

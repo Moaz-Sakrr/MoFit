@@ -35,8 +35,8 @@
 
 ### ٤) ظبط لينكات الإيميل
 في Supabase افتح **Authentication ← URL Configuration**:
-- **Site URL**: لينك الموقع بعد ما يترفع، مثلاً `https://mofit.netlify.app`
-- **Redirect URLs**: ضيف `https://mofit.netlify.app/login.html` و `https://mofit.netlify.app/login.html#reset`
+- **Site URL**: لينك الموقع بعد ما يترفع، مثلاً `https://YOUR-SITE`
+- **Redirect URLs**: ضيف `https://YOUR-SITE/login.html` و `https://YOUR-SITE/login.html#reset`
 
 ده مهم عشان لينك تأكيد الإيميل ولينك «نسيت كلمة السر» يرجعوا للموقع بتاعك.
 
@@ -89,6 +89,10 @@ js/views/progress.js  صور المتدربين (الكوتش)
 js/images.js          تصغير الصور قبل الرفع
 js/pwa.js             تثبيت الموقع كتطبيق (تسجيل sw.js وزر التثبيت)
 sw.js                 service worker بسيط: بيجيب من النت الأول، ولو مفيش نت يرجع لآخر نسخة
+_headers              هيدرز الأمان (CSP ومنع الـ iframe وغيرهم). Cloudflare بيطبّقه تلقائي
+.assetsignore         الملفات اللي ما تتنشرش مع الموقع (.git وsupabase وREADME)
+js/site.js            السنة في الفوتر وسلايدر الصور الثابتة (بدل سكريبت جوه HTML عشان الـ CSP)
+js/vendor/supabase.js مكتبة supabase-js 2.117.3 متحمّلة محلياً بدل CDN
 manifest.webmanifest  اسم التطبيق وألوانه وأيقوناته
 images/icons/         أيقونات التطبيق والـ favicon
 supabase/schema.sql   قاعدة البيانات وقواعد الحماية
@@ -130,3 +134,8 @@ images/               صور الكوتش والمتدربين
 
 **عايز أضيف كوتش تاني؟**
 اعمل نفس خطوة ٥ بإيميله.
+
+## الأمان
+
+- الـ CSP في `_headers` بيسمح بالسكريبتات من الموقع نفسه بس، وبالاتصال بمشروع Supabase بتاعك واليوتيوب. لو غيّرت رابط مشروع Supabase، غيّره في `connect-src` كمان. وصور النتايج لازم تتخزّن في Supabase (ده اللي بيحصل لما ترفعها من لوحة الكوتش)، لأن الصور من أي موقع تاني بيحجبها الـ CSP.
+- لتحديث مكتبة Supabase: في فولدر مؤقت شغّل `npm i @supabase/supabase-js esbuild`، وبعدين `npx esbuild entry.js --bundle --format=esm --minify --outfile=supabase.js` (والـ entry فيه سطر `export { createClient } from "@supabase/supabase-js";`)، وانسخ الناتج على `js/vendor/supabase.js` وجرّب الدخول.

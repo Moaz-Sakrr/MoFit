@@ -304,3 +304,5 @@ textarea.tall{min-height:240px}
   .video-bar h2{font-size:1.25rem}
   .toast{bottom:16px;width:calc(100% - 32px);text-align:center}
 }
+.sheet-text{color:var(--ink-2)}
+.empty.gap-top{margin-top:24px}

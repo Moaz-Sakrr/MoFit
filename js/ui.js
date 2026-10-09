@@ -73,7 +73,7 @@ export function loadingView(kind = "rows") {
 export function confirmSheet(title, text, onYes, yesLabel = "احذف") {
   const dlg = document.getElementById("sheet");
   const form = document.getElementById("sheet-form");
-  form.innerHTML = `<h2>${esc(title)}</h2><p style="color:var(--ink-2)">${esc(text)}</p>
+  form.innerHTML = `<h2>${esc(title)}</h2><p class="sheet-text">${esc(text)}</p>
     <div class="foot"><button class="btn btn-ink" type="submit">${esc(yesLabel)}</button><button class="btn btn-ghost" type="button" id="sheet-cancel">إلغاء</button></div>`;
   form.querySelector("#sheet-cancel").onclick = () => dlg.close();
   form.onsubmit = async (e) => {

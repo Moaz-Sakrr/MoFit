@@ -1,5 +1,6 @@
 // اتصال واحد بـ Supabase بيستخدمه الموقع كله
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm";
+// المكتبة متحمّلة محلياً (supabase-js 2.117.3) بدل CDN، عشان محدش من بره يقدر يبدّل الكود اللي بيشوف جلسة الدخول
+import { createClient } from "./vendor/supabase.js";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);

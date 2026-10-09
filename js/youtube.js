@@ -30,9 +30,12 @@ export function openVideo(url, title) {
   document.getElementById("video-title").textContent = title || "";
   dlg.classList.toggle("vertical", isShort(url));
   // youtube-nocookie: نسخة اليوتيوب اللي ما بتحطش كوكيز تتبع
-  frame.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1"
-    title="${title ? title.replace(/"/g, "") : "فيديو التمرين"}"
-    allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
+  const f = document.createElement("iframe");
+  f.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1`;
+  f.title = title || "فيديو التمرين";
+  f.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+  f.allowFullscreen = true;
+  frame.replaceChildren(f);
   dlg.showModal();
 }
 

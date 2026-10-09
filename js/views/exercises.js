@@ -52,7 +52,7 @@ function draw(main, isCoach) {
     <div class="view-head"><div><h1>التمارين</h1><p>اختار العضلة، واضغط على الصورة عشان تشوف فيديو طريقة الأداء. الأرقام هي المجموعات × العدات.</p></div>
       ${isCoach ? `<button class="btn btn-tape" type="button" id="add-ex">إضافة تمرين</button>` : ""}</div>
     <div class="index" role="tablist">${tabs}</div>
-    ${shown.length ? `<ul class="rows">${rows}</ul>` : `<div class="empty" style="margin-top:24px">مفيش تمارين للعضلة دي لسه.</div>`}`;
+    ${shown.length ? `<ul class="rows">${rows}</ul>` : `<div class="empty gap-top">مفيش تمارين للعضلة دي لسه.</div>`}`;
 
   main.querySelectorAll("[data-muscle]").forEach((b) => (b.onclick = () => { muscle = b.dataset.muscle; draw(main, isCoach); }));
   main.querySelectorAll("[data-play]").forEach((b) => (b.onclick = async () => {

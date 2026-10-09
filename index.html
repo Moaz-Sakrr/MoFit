@@ -123,11 +123,6 @@
 
 <script type="module" src="js/landing.js"></script>
 <script type="module" src="js/pwa.js"></script>
-<script>
-  document.getElementById('year').textContent = new Date().getFullYear();
-  // سلايدر المقارنة قبل وبعد
-  document.querySelectorAll('.compare input').forEach(r =>
-    r.addEventListener('input', () => r.parentElement.style.setProperty('--pos', r.value + '%')));
-</script>
+<script type="module" src="js/site.js"></script>
 </body>
 </html>
