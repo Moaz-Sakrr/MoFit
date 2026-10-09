@@ -11,6 +11,14 @@
   <img src="docs/screenshots/home.jpg" alt="الصفحة الرئيسية لموقع MoFit" width="100%">
 </p>
 
+## الفيديو التعريفي
+فيديو قصير (40 ثانية) بيعرض مميزات الموقع من شاشات حقيقية جواه: نتايج المشتركين، والتمارين بالفيديو، والجداول، والمتابعة، والتثبيت على الموبايل.
+
+<p align="center">
+  <a href="docs/promo/mofit-promo.mp4"><img src="docs/promo/preview.gif" alt="جزء من الفيديو التعريفي لـ MoFit: مقارنة قبل وبعد، وفتح فيديو تمرين" width="320"></a>
+</p>
+<p align="center"><a href="docs/promo/mofit-promo.mp4"><b>شوف الفيديو كامل (MP4)</b></a></p>
+
 ## شكل الموقع
 
 ### الصفحة الرئيسية
@@ -34,6 +42,24 @@
   <tr>
     <td width="50%"><img src="docs/screenshots/login.jpg" alt="تسجيل الدخول"></td>
     <td width="50%"><img src="docs/screenshots/signup.jpg" alt="إنشاء حساب جديد"></td>
+  </tr>
+</table>
+
+### على الموبايل
+الموقع متصمم للموبايل الأول، وبيتثبّت على الشاشة الرئيسية زي أي تطبيق. (الصور دي ببيانات تجريبية.)
+
+<table>
+  <tr>
+    <td width="25%"><img src="docs/screenshots/mobile-home.jpg" alt="الصفحة الرئيسية على الموبايل"></td>
+    <td width="25%"><img src="docs/screenshots/mobile-exercises.jpg" alt="صفحة التمارين على الموبايل"></td>
+    <td width="25%"><img src="docs/screenshots/mobile-programs.jpg" alt="جداول التمرين على الموبايل"></td>
+    <td width="25%"><img src="docs/screenshots/mobile-account.jpg" alt="صفحة حسابي على الموبايل"></td>
+  </tr>
+  <tr>
+    <td align="center">الرئيسية</td>
+    <td align="center">التمارين</td>
+    <td align="center">الجداول</td>
+    <td align="center">حسابي</td>
   </tr>
 </table>
 
@@ -99,7 +125,7 @@
 ## التواصل
 
 - واتساب: [010 3256 7894](https://wa.me/201032567894)
-- إنستجرام: [@mohamedalaa3873](https://instagram.com/mohamedalaa3873)
+- إنستجرام: [@mofit.co1](https://instagram.com/mofit.co1)
 
 ## الفريق
 
