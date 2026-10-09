@@ -87,6 +87,11 @@
 footer{background:var(--night);color:var(--night-mute);padding-block:26px;font-size:.88rem}
 footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:center}
 footer .logo{color:var(--night-ink);font-size:1.2rem}
+footer .credits{display:flex;flex-direction:column;gap:2px;font-family:var(--latin);font-size:1rem;letter-spacing:.02em}
+footer .credits b{color:var(--night-ink);font-weight:600}
+footer .credits a{color:inherit;text-decoration:none;border-bottom:1px solid transparent}
+footer .credits a:hover b,footer .credits a:focus-visible b{color:var(--tape)}
+footer .credits a:hover{border-bottom-color:var(--tape)}
 
 .compare:focus-within{outline:3px solid var(--tape);outline-offset:3px}
 
