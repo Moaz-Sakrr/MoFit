@@ -127,6 +127,10 @@
 - واتساب: [010 3256 7894](https://wa.me/201032567894)
 - إنستجرام: [@mofit.co1](https://instagram.com/mofit.co1)
 
+<p align="center"><img src="docs/qr/mofit-qr-card.png" alt="QR كود بيفتح موقع MoFit" width="280"></p>
+
+امسح الكود يفتحلك الموقع على طول. فيه [نسخة للستوري والطباعة](docs/qr/mofit-qr-card.png) و[الكود لوحده بجودة عالية](docs/qr/mofit-qr.png).
+
 ## الفريق
 
 تصميم وتطوير: [Moaz Sakr](https://www.linkedin.com/in/moaz-mohamed-71b9a7312) و [Mohamed Nabil](https://www.linkedin.com/in/mohamed-nabil-414a55361)
