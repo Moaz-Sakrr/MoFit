@@ -8,6 +8,6 @@ export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 
 // رقم واتساب الكوتش (بالصيغة الدولية من غير +) — بيظهر للمتدرب لو اشتراكه مش مفعّل
 // مفتاح Cloudflare Turnstile (Site Key) — عام وآمن إنه يبقى هنا. سيبه فاضي لو مش مفعّل الحماية
-export const TURNSTILE_SITE_KEY = "";
+export const TURNSTILE_SITE_KEY = "0x4AAAAAAFR4j4OcrKxs0eI2";
 
 export const COACH_WHATSAPP = "201032567894";
