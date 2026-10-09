@@ -24,6 +24,8 @@
 .auth-form{display:flex;flex-direction:column;gap:16px}
 .auth-form h2{font-size:2rem;text-align:center}
 .auth-form .btn{margin-top:4px}
+.captcha{display:flex;justify-content:center}
+.captcha:empty{display:none}
 .auth-box input{background:rgb(255 255 255/.1);border:1px solid rgb(255 255 255/.28);color:#fff;border-radius:10px}
 .auth-box input::placeholder{color:rgb(255 255 255/.45)}
 .auth-box input:focus{background:rgb(255 255 255/.16);border-color:var(--tape);outline:none}

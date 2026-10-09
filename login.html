@@ -42,6 +42,7 @@
     <form id="form-login" class="auth-form">
       <div class="field"><label for="li-email">الإيميل</label><input id="li-email" type="email" autocomplete="email" required dir="ltr"></div>
       <div class="field"><label for="li-pass">كلمة السر</label><input id="li-pass" type="password" autocomplete="current-password" required dir="ltr"></div>
+      <div class="captcha" id="cap-login"></div>
       <button class="btn btn-ink" type="submit">دخول</button>
       <button class="link" type="button" id="forgot">نسيت كلمة السر؟</button>
     </form>
@@ -51,6 +52,7 @@
       <div class="field"><label for="su-phone">رقم الموبايل</label><input id="su-phone" type="tel" autocomplete="tel" required dir="ltr" placeholder="01xxxxxxxxx"></div>
       <div class="field"><label for="su-email">الإيميل</label><input id="su-email" type="email" autocomplete="email" required dir="ltr"></div>
       <div class="field"><label for="su-pass">كلمة السر</label><input id="su-pass" type="password" autocomplete="new-password" minlength="6" required dir="ltr"><small>٦ حروف أو أرقام على الأقل</small></div>
+      <div class="captcha" id="cap-signup"></div>
       <button class="btn btn-ink" type="submit">اعمل الحساب</button>
       <p class="hint">بعد ما تعمل الحساب، الكوتش هيفعّله أول ما اشتراكك يتأكد.</p>
     </form>

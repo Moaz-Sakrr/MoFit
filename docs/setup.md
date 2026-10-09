@@ -139,3 +139,11 @@ images/               صور الكوتش والمتدربين
 
 - الـ CSP في `_headers` بيسمح بالسكريبتات من الموقع نفسه بس، وبالاتصال بمشروع Supabase بتاعك واليوتيوب. لو غيّرت رابط مشروع Supabase، غيّره في `connect-src` كمان. وصور النتايج لازم تتخزّن في Supabase (ده اللي بيحصل لما ترفعها من لوحة الكوتش)، لأن الصور من أي موقع تاني بيحجبها الـ CSP.
 - لتحديث مكتبة Supabase: في فولدر مؤقت شغّل `npm i @supabase/supabase-js esbuild`، وبعدين `npx esbuild entry.js --bundle --format=esm --minify --outfile=supabase.js` (والـ entry فيه سطر `export { createClient } from "@supabase/supabase-js";`)، وانسخ الناتج على `js/vendor/supabase.js` وجرّب الدخول.
+
+## حماية التسجيل بـ Turnstile (CAPTCHA)
+
+1. في Cloudflare ← **Turnstile** ← **Add widget**: الاسم MoFit، والـ Hostnames: دومين الموقع (مثلاً `mofit.mofit233.workers.dev`)، والنوع **Managed**. هتاخد **Site Key** (عام) و**Secret Key** (سري، ما يتحطش في الموقع).
+2. حط الـ Site Key في `TURNSTILE_SITE_KEY` في `js/config.js`، وارفع الموقع.
+3. بعد ما الموقع يترفع: في Supabase ← **Authentication ← Attack Protection** ← فعّل **Enable CAPTCHA protection**، واختار **Turnstile by Cloudflare**، وحط الـ Secret Key.
+
+الترتيب مهم: لو فعّلت الحماية في Supabase قبل ما ترفع الموقع بالمفتاح، الدخول والتسجيل هيقفوا.
