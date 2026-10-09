@@ -1,8 +1,9 @@
 <!-- قالب إيميل تأكيد الحساب. انسخه في Supabase ← Authentication ← Emails ← Templates ← Confirm signup
      العنوان (Subject): أكّد حسابك في MoFit
-     معمول بجداول وستايل جوه العناصر عشان يظهر صح في Gmail و Outlook وتطبيقات الموبايل
-     اللوجو صورة (images/email-logo.png على الموقع) لأن Gmail مبيحمّلش خطوط الويب.
-     الخطوط نفس خطوط الموقع (Changa للعناوين و Tajawal للكلام)، والبرامج اللي مبتدعمهاش بتنزل لـ Tahoma -->
+     معمول بجداول وستايل جوه العناصر عشان يظهر صح في Gmail و Outlook وتطبيقات الموبايل.
+     Gmail على الموبايل في الوضع الليلي بيقلب ألوان الإيميل لوحده (الغامق يبقى فاتح والأصفر يبقى بني) ومبيلمسش الصور،
+     فالرأس (الشريط الأصفر واللوجو) والزرار صور على الموقع، والكارت أبيض بكلام غامق عشان لما يتقلب يطلع غامق بكلام فاتح.
+     الصور اتعملت بـ promo-video/lib/email-images.mjs -->
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
@@ -15,44 +16,43 @@
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#e6e5e0;">
     <tr>
       <td align="center" style="padding:32px 16px;">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" dir="rtl" style="max-width:480px;background:#15171a;border-radius:14px;overflow:hidden;font-family:'Tajawal',Tahoma,Arial,sans-serif;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" dir="rtl" style="max-width:480px;background:#ffffff;border-radius:14px;overflow:hidden;font-family:'Tajawal',Tahoma,Arial,sans-serif;">
           <tr>
-            <td style="height:6px;background:#f2c200;font-size:0;line-height:0;">&nbsp;</td>
-          </tr>
-          <tr>
-            <td align="center" style="padding:32px 28px 8px;">
-              <img src="https://mofit.mofit233.workers.dev/images/email-logo.png" width="128" height="50" alt="MoFit" style="display:block;border:0;outline:none;text-decoration:none;">
+            <td style="padding:0;line-height:0;font-size:0;background:#15171a;">
+              <img src="https://mofit.mofit233.workers.dev/images/email-header.png" width="480" alt="MoFit" style="display:block;width:100%;max-width:480px;height:auto;border:0;outline:none;text-decoration:none;">
             </td>
           </tr>
           <tr>
-            <td style="padding:20px 28px 0;text-align:right;">
-              <h1 style="margin:0 0 12px;font-family:'Changa','Tajawal',Tahoma,Arial,sans-serif;font-weight:800;font-size:24px;line-height:1.5;color:#ffffff;">أهلاً بيك في MoFit</h1>
-              <p style="margin:0 0 24px;font-size:16px;line-height:1.9;color:#c9c8c2;">
+            <td style="padding:28px 28px 0;text-align:right;">
+              <h1 style="margin:0 0 12px;font-family:'Changa','Tajawal',Tahoma,Arial,sans-serif;font-weight:800;font-size:24px;line-height:1.5;color:#17191b;">أهلاً بيك في MoFit</h1>
+              <p style="margin:0 0 24px;font-size:16px;line-height:1.9;color:#4d5257;">
                 خطوة واحدة وحسابك يبقى جاهز. اضغط على الزرار تحت عشان تأكد إن الإيميل ده بتاعك.
               </p>
             </td>
           </tr>
           <tr>
             <td align="center" style="padding:0 28px 8px;">
-              <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#f2c200;color:#15171a;font-family:'Changa','Tajawal',Tahoma,Arial,sans-serif;font-size:17px;font-weight:700;text-decoration:none;padding:14px 36px;border-radius:10px;">تأكيد الحساب</a>
+              <a href="{{ .ConfirmationURL }}" style="display:inline-block;text-decoration:none;border:0;">
+                <img src="https://mofit.mofit233.workers.dev/images/email-confirm-btn.png" width="187" height="53" alt="تأكيد الحساب" style="display:block;border:0;outline:none;font-family:Tahoma,Arial,sans-serif;font-size:17px;font-weight:bold;color:#17191b;">
+              </a>
             </td>
           </tr>
           <tr>
             <td style="padding:24px 28px 0;text-align:right;">
-              <p style="margin:0 0 8px;font-size:14px;line-height:1.9;color:#c9c8c2;">
+              <p style="margin:0 0 8px;font-size:14px;line-height:1.9;color:#4d5257;">
                 بعد التأكيد، ادخل بالإيميل وكلمة السر. الكوتش هيفعّل اشتراكك وتبدأ تشوف تمارينك وجدولك.
               </p>
-              <p style="margin:0 0 8px;font-size:13px;line-height:1.9;color:#8d8c87;">
+              <p style="margin:0 0 8px;font-size:13px;line-height:1.9;color:#6b7076;">
                 لو الزرار مش شغال، انسخ اللينك ده وافتحه في المتصفح:
               </p>
               <p dir="ltr" style="margin:0;font-size:12px;line-height:1.6;word-break:break-all;text-align:left;">
-                <a href="{{ .ConfirmationURL }}" style="color:#f2c200;">{{ .ConfirmationURL }}</a>
+                <a href="{{ .ConfirmationURL }}" style="color:#4d5257;">{{ .ConfirmationURL }}</a>
               </p>
             </td>
           </tr>
           <tr>
-            <td style="padding:28px 28px 28px;text-align:right;">
-              <p style="margin:0;padding-top:18px;border-top:1px solid #2a2d31;font-size:12px;line-height:1.8;color:#8d8c87;">
+            <td style="padding:28px;text-align:right;">
+              <p style="margin:0;padding-top:18px;border-top:1px solid #e6e5e0;font-size:12px;line-height:1.8;color:#6b7076;">
                 لو إنت مش اللي عملت الحساب ده، تجاهل الرسالة ومفيش حاجة هتحصل.
               </p>
             </td>
