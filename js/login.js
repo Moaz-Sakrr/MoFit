@@ -34,7 +34,7 @@ function notice(text, kind = "info") {
 function arabicError(err) {
   const m = (err && err.message) || "";
   if (/Invalid login credentials/i.test(m)) return "الإيميل أو كلمة السر غلط.";
-  if (/Email not confirmed/i.test(m)) return "لازم تأكد الإيميل الأول. افتح الرسالة اللي وصلتك واضغط على اللينك.";
+  if (/Email not confirmed/i.test(m)) return "لازم تأكد الإيميل الأول. افتح الرسالة اللي وصلتك واضغط على اللينك، ولو مش لاقيها دوّر في الـ Spam.";
   if (/already registered|already exists/i.test(m)) return "الإيميل ده عليه حساب بالفعل. جرب تسجيل الدخول.";
   if (/Password should be/i.test(m)) return "كلمة السر لازم تبقى ٦ حروف على الأقل.";
   if (/captcha/i.test(m)) return "فشل التحقق الأمني. جرب تاني.";
@@ -99,7 +99,7 @@ forms.signup.onsubmit = async (e) => {
   if (data.session) return location.replace("app.html");
   forms.signup.reset();
   show("login");
-  notice("الحساب اتعمل. افتح الإيميل وأكّد الحساب، وبعدين ادخل من هنا.", "ok");
+  notice("الحساب اتعمل. افتح الإيميل وأكّد الحساب، وبعدين ادخل من هنا. لو مش لاقي الرسالة، دوّر عليها في الـ Spam (الرسايل غير المرغوب فيها).", "ok");
 };
 
 $("forgot").onclick = async () => {
