@@ -1,0 +1,21 @@
+# فحص كل ساعة: الموقع و Supabase شغالين، ومفيش بيانات خاصة باينة لأي حد
+# لو الفحص فشل، GitHub بيبعت إيميل لصاحب الريبو تلقائياً
+# كمان بيخلي مشروع Supabase المجاني نشط (المشاريع المجانية بتتوقف بعد أسبوع من غير استخدام)
+name: Health check
+
+on:
+  schedule:
+    - cron: "17 * * * *"   # كل ساعة (الدقيقة 17 عشان نبعد عن زحمة أول الساعة)
+  workflow_dispatch:        # تشغيل يدوي من تبويب Actions
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check site, Supabase and data protection
+        run: bash .github/scripts/health-check.sh

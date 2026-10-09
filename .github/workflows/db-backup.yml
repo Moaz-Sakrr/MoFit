@@ -1,0 +1,60 @@
+# نسخة احتياطية من قاعدة البيانات أول كل شهر (والخطة المجانية في Supabase مفيهاش باك أب)
+# النسخة متشفّرة بباسورد قبل ما تترفع، لأن الريبو عام وفيها بيانات المتدربين
+# بتتحفظ في تبويب Actions (Artifacts) لمدة 90 يوم. خطوات الاسترجاع في docs/setup.md
+#
+# محتاج 2 Secrets في الريبو (Settings ← Secrets and variables ← Actions):
+#   SUPABASE_DB_URL     رابط الاتصال من Supabase ← Connect ← Session pooler (فيه باسورد الداتابيز)
+#   BACKUP_PASSPHRASE   باسورد طويل من اختيارك لتشفير النسخة. احفظه في مكان آمن، من غيره النسخة ما تتفتحش
+name: Database backup
+
+on:
+  schedule:
+    - cron: "0 3 1 * *"   # أول يوم في كل شهر، الساعة 3 الفجر UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+    steps:
+      - name: Check secrets
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ] || [ -z "$BACKUP_PASSPHRASE" ]; then
+            echo "::error::ضيف SUPABASE_DB_URL و BACKUP_PASSPHRASE في Settings ← Secrets and variables ← Actions"
+            exit 1
+          fi
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # نفس الطريقة اللي Supabase بتشرحها: الأدوار، وشكل الجداول، والبيانات، كل واحد في ملف
+      - name: Dump database
+        run: |
+          mkdir backup
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f backup/roles.sql --role-only
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f backup/schema.sql
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f backup/data.sql --use-copy --data-only
+          ls -la backup
+
+      - name: Encrypt
+        run: |
+          name="mofit-db-$(date -u +%Y-%m-%d)"
+          tar -czf "$name.tar.gz" backup
+          gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSPHRASE" \
+            --symmetric --cipher-algo AES256 -o "$name.tar.gz.gpg" "$name.tar.gz"
+          rm -rf backup "$name.tar.gz"
+          echo "NAME=$name" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.NAME }}
+          path: ${{ env.NAME }}.tar.gz.gpg
+          retention-days: 90
+          if-no-files-found: error

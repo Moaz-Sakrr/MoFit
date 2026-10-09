@@ -147,3 +147,42 @@ images/               صور الكوتش والمتدربين
 3. بعد ما الموقع يترفع: في Supabase ← **Authentication ← Attack Protection** ← فعّل **Enable CAPTCHA protection**، واختار **Turnstile by Cloudflare**، وحط الـ Secret Key.
 
 الترتيب مهم: لو فعّلت الحماية في Supabase قبل ما ترفع الموقع بالمفتاح، الدخول والتسجيل هيقفوا.
+
+## المراقبة والنسخ الاحتياطي (GitHub Actions)
+
+في الريبو فحصين بيشتغلوا لوحدهم على GitHub:
+
+| الفحص | بيشتغل إمتى | بيعمل إيه |
+|---|---|---|
+| `Health check` | كل ساعة | بيتأكد إن صفحات الموقع و Supabase (الدخول وقاعدة البيانات) شغالين، وإن زائر من غير حساب ما يقدرش يشوف أي بيانات خاصة (المتدربين، التمارين، الجداول، صور المتابعة). وكمان بيخلي مشروع Supabase المجاني نشط |
+| `Database backup` | أول كل شهر | نسخة احتياطية متشفّرة من قاعدة البيانات، بتتحفظ 90 يوم |
+
+لو أي فحص فشل، GitHub بيبعتلك إيميل تلقائياً. تقدر تشغّل أي واحد يدوي من تبويب **Actions** ← اختار الفحص ← **Run workflow**.
+وتقدر تشغّل فحص الصحة على جهازك: `bash .github/scripts/health-check.sh`
+
+### تجهيز النسخة الاحتياطية (مرة واحدة)
+في GitHub: **Settings ← Secrets and variables ← Actions ← New repository secret**، وضيف:
+
+1. `SUPABASE_DB_URL`: من Supabase ← زرار **Connect** ← **Session pooler** ← انسخ الرابط وحط باسورد الداتابيز مكان `[YOUR-PASSWORD]`. (لازم Session pooler مش Direct connection، لأن سيرفرات GitHub مش بتدعم IPv6.)
+2. `BACKUP_PASSPHRASE`: باسورد طويل من اختيارك لتشفير النسخ. **احفظه في مكان آمن**، من غيره النسخ ما تتفتحش.
+
+وبعدين شغّل `Database backup` يدوي مرة عشان تتأكد إنه شغال.
+
+### استرجاع نسخة
+1. من **Actions** ← آخر تشغيل لـ `Database backup` ← نزّل الملف من **Artifacts**، وفكّه (zip).
+2. فك التشفير:
+   ```bash
+   gpg -o backup.tar.gz -d mofit-db-YYYY-MM-DD.tar.gz.gpg
+   tar -xzf backup.tar.gz
+   ```
+3. ارجع الملفات بالترتيب على مشروع Supabase (ويُفضّل مشروع جديد فاضي، عشان ما تكتبش فوق بيانات شغالة):
+   ```bash
+   psql "$SUPABASE_DB_URL" -f backup/roles.sql
+   psql "$SUPABASE_DB_URL" -f backup/schema.sql
+   psql "$SUPABASE_DB_URL" -f backup/data.sql
+   ```
+
+### حاجات لازم تعرفها
+- النسخة فيها **قاعدة البيانات بس** (الحسابات والتمارين والجداول والنتايج). الملفات المرفوعة (فيديوهات التمارين وصور المتابعة) مش جواها. عشان كده الأحسن الفيديوهات تبقى على يوتيوب (Unlisted).
+- النسخ متشفّرة لأن الريبو عام. ما ترفعش أي نسخة من غير تشفير على GitHub.
+- GitHub بيوقف الفحوصات المجدولة لوحده لو الريبو فضل **60 يوم** من غير أي commit. لو حصل، هتلاقي رسالة في تبويب Actions، وتقدر ترجّعها بزرار **Enable workflow**.
