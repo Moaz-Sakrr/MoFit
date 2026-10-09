@@ -162,6 +162,7 @@ table.members{width:100%;border-collapse:collapse;min-width:820px;font-size:.93r
 .members .who span{color:var(--ink-2);font-size:.85rem;direction:ltr;unicode-bidi:isolate;display:inline-block}
 .members input[type=date]{width:auto;padding:6px 8px;font-size:.88rem}
 .members .acts{display:flex;gap:6px;flex-wrap:wrap}
+.members .btn-del{color:var(--bad)}
 .days-left{font-size:.8rem;color:var(--ink-2);display:block;margin-top:2px}
 
 /* ---------- نوافذ التعديل ---------- */

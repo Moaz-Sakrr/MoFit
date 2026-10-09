@@ -232,8 +232,9 @@ create policy "progress files read"   on storage.objects for select
   using (bucket_id = 'progress-photos' and ((storage.foldername(name))[1] = auth.uid()::text or public.is_coach()));
 create policy "progress files insert" on storage.objects for insert
   with check (bucket_id = 'progress-photos' and (storage.foldername(name))[1] = auth.uid()::text and public.is_active_member());
+-- الحذف: صاحب الصور، والكوتش (بيستخدمها بس لما يحذف حساب متدرب بالكامل، شوف 7.9)
 create policy "progress files delete" on storage.objects for delete
-  using (bucket_id = 'progress-photos' and (storage.foldername(name))[1] = auth.uid()::text);
+  using (bucket_id = 'progress-photos' and ((storage.foldername(name))[1] = auth.uid()::text or public.is_coach()));
 
 -- 7.8) تشديد صور المتابعة -----------------------------------------------------
 -- (أ) كل مسارات الصور لازم تكون جوه فولدر صاحب الصف نفسه
@@ -256,6 +257,26 @@ end $$;
 drop trigger if exists limit_progress_uploads on public.progress_photos;
 create trigger limit_progress_uploads before insert on public.progress_photos
   for each row execute function public.limit_progress_uploads();
+
+-- 7.9) الكوتش يحذف حساب متدرب نهائياً ----------------------------------------
+-- بيمسح المستخدم من auth.users، فبيتمسح معاه صف profiles وصفوف progress_photos (on delete cascade)
+-- ومش هيقدر يدخل تاني. ملفات الصور نفسها الموقع بيمسحها من المخزن بعدها (SQL مينفعش يمسح ملفات Storage)
+create or replace function public.delete_member(member uuid)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  if not public.is_coach() then
+    raise exception 'الكوتش بس اللي يقدر يحذف حسابات';
+  end if;
+  if exists (select 1 from profiles where id = member and role = 'coach') then
+    raise exception 'مينفعش تحذف حساب الكوتش';
+  end if;
+  delete from auth.users where id = member;
+  if not found then
+    raise exception 'الحساب ده مش موجود';
+  end if;
+end $$;
+revoke all on function public.delete_member(uuid) from public, anon;
+grant execute on function public.delete_member(uuid) to authenticated;
 
 -- 8) بيانات بداية (أمثلة تقدر تعدّلها أو تمسحها من لوحة الكوتش) ----------
 insert into public.exercises (muscle, name, sets, reps, cues, sort)

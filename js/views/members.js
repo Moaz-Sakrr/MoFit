@@ -1,6 +1,6 @@
-// لوحة الكوتش: كل حسابات المتدربين، وتفعيل أو إيقاف أي حد، وتحديد نهاية الاشتراك
+// لوحة الكوتش: كل حسابات المتدربين، وتفعيل أو إيقاف أي حد، وتحديد نهاية الاشتراك، وحذف الحساب نهائياً
 import { supabase, esc, today } from "../supabase.js";
-import { toast, loadingView } from "../ui.js";
+import { toast, loadingView, confirmSheet } from "../ui.js";
 
 let list = [];
 let filter = "all";
@@ -72,6 +72,7 @@ function draw(main) {
           : `<button class="btn btn-ink btn-sm" type="button" data-toggle>تفعيل</button>`}
         <button class="btn btn-ghost btn-sm" type="button" data-add="1">+ شهر</button>
         <button class="btn btn-ghost btn-sm" type="button" data-add="3">+ ٣ شهور</button>
+        <button class="btn btn-ghost btn-sm btn-del" type="button" data-del>حذف</button>
       </div></td>
     </tr>`;
   }).join("");
@@ -104,7 +105,26 @@ function draw(main) {
     }));
     tr.querySelector("[data-end]").onchange = (e) =>
       save(main, p, { subscription_end: e.target.value || null }, "تاريخ النهاية اتغيّر");
+    tr.querySelector("[data-del]").onclick = () => removeMember(main, p);
   });
+}
+
+// حذف الحساب نهائياً: الحساب وبياناته وصور المتابعة بتاعته
+function removeMember(main, p) {
+  const name = p.full_name || p.email || "المتدرب ده";
+  confirmSheet(`حذف حساب «${name}»؟`,
+    "الحساب وكل صور المتابعة بتاعته هيتحذفوا نهائياً، ومش هيقدر يدخل تاني. لو حب يرجع لازم يعمل حساب جديد.",
+    async () => {
+      // نجيب أسماء ملفات صوره الأول، وبعد ما الحساب يتحذف نمسحها من المخزن
+      const { data: files } = await supabase.storage.from("progress-photos").list(p.id, { limit: 1000 });
+      const { error } = await supabase.rpc("delete_member", { member: p.id });
+      if (error) throw error;
+      list = list.filter((x) => x.id !== p.id);
+      draw(main);
+      const paths = (files || []).map((f) => `${p.id}/${f.name}`);
+      const { error: filesError } = paths.length ? await supabase.storage.from("progress-photos").remove(paths) : {};
+      toast(filesError ? "الحساب اتحذف، بس بعض الصور فضلت في المخزن" : "الحساب اتحذف", !!filesError);
+    }, "احذف الحساب");
 }
 
 async function save(main, p, patch, okText) {
