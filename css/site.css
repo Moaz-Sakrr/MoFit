@@ -104,7 +104,7 @@ footer .credits a:hover{border-bottom-color:var(--tape)}
   .cta-row .btn{flex:1 1 150px}
   .tape .wrap{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-block:22px;text-align:center}
   .tape .s{flex-direction:column;align-items:center;gap:4px}
-  .tape b{font-size:1.9rem}
+  .tape b{font-size:min(1.9rem,7.4vw);white-space:nowrap} /* «من الصفر» تفضل سطر واحد، والخط يصغر سِنة على الشاشات الضيقة */
   .tape span{font-size:.8rem;line-height:1.4}
   .about{padding-block:56px}
   .about .wrap{gap:36px}
