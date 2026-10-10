@@ -265,10 +265,15 @@ textarea.tall{min-height:240px}
   .index::-webkit-scrollbar{display:none}
   .mt{flex:none;white-space:nowrap;font-size:1.55rem;padding:6px 0 12px}
 
-  .row{grid-template-columns:104px minmax(0,1fr);gap:10px 14px;padding:18px 0}
+  /* كل تمرين كارت: الفيديو بعرض الشاشة وتحته الاسم والعدد وسطرين شرح */
+  .row{grid-template-columns:minmax(0,1fr);gap:12px;padding:20px 0}
+  .thumb .play span{width:56px;height:56px}
+  .thumb .play svg{width:22px;height:22px}
   .row h3{font-size:1.3rem}
   .row-title{gap:6px 12px}
   .row p{font-size:.92rem}
+  .cues:not(.open){display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+  .more{border:0;background:none;padding:4px 0;cursor:pointer;color:var(--ink);font:inherit;font-size:.85rem;font-weight:600;text-decoration:underline;text-underline-offset:4px;width:fit-content}
   .row-acts{gap:10px}
   .row-acts .btn{flex:1}
   .prog-grid{gap:20px}

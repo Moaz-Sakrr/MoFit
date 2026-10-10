@@ -42,7 +42,7 @@ function draw(main, isCoach) {
       ${thumb}
       <div class="row-body">
         <div class="row-title"><h3>${esc(e.name)}</h3>${e.sets || e.reps ? `<span class="dose">${esc(e.sets)} <em>×</em> ${esc(e.reps)}</span>` : ""}</div>
-        ${e.cues ? `<p>${esc(e.cues)}</p>` : ""}
+        ${e.cues ? `<p class="cues">${esc(e.cues)}</p><button class="more" type="button" aria-expanded="false" hidden>اقرأ أكتر</button>` : ""}
       </div>
       ${isCoach ? `<div class="row-acts"><button class="btn btn-ink btn-sm" type="button" data-edit="${e.id}">تعديل</button><button class="btn btn-ghost btn-sm" type="button" data-del="${e.id}">حذف</button></div>` : ""}
     </li>`;
@@ -61,6 +61,18 @@ function draw(main, isCoach) {
       const b = main.querySelector(`.thumb.upload[data-play="${uploads[i].id}"]`);
       if (b && d.signedUrl) b.insertAdjacentHTML("afterbegin", `<video src="${esc(d.signedUrl)}#t=0.1" preload="metadata" muted playsinline aria-hidden="true"></video>`);
     }));
+
+  // الشرح متقصوص لسطرين على الموبايل بس، فالزرار بيظهر لو فيه كلام مستخبي فعلاً
+  main.querySelectorAll(".cues").forEach((p) => {
+    if (p.scrollHeight <= p.clientHeight + 1) return;
+    const more = p.nextElementSibling;
+    more.hidden = false;
+    more.onclick = () => {
+      const open = p.classList.toggle("open");
+      more.textContent = open ? "اقفل" : "اقرأ أكتر";
+      more.setAttribute("aria-expanded", open);
+    };
+  });
 
   main.querySelectorAll("[data-muscle]").forEach((b) => (b.onclick = () => { muscle = b.dataset.muscle; draw(main, isCoach); }));
   main.querySelectorAll("[data-play]").forEach((b) => (b.onclick = async () => {
