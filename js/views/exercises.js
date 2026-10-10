@@ -54,6 +54,14 @@ function draw(main, isCoach) {
     <div class="index" role="tablist">${tabs}</div>
     ${shown.length ? `<ul class="rows">${rows}</ul>` : `<div class="empty gap-top">مفيش تمارين للعضلة دي لسه.</div>`}`;
 
+  // الفيديوهات المرفوعة ملهاش صورة، فبنعرض أول فريم منها (#t=0.1 بيخلّي المتصفح يرسمه)
+  const uploads = shown.filter((e) => e.video_path);
+  if (uploads.length) supabase.storage.from(VIDEOS).createSignedUrls(uploads.map((e) => e.video_path), 3600).then(({ data }) =>
+    (data || []).forEach((d, i) => {
+      const b = main.querySelector(`.thumb.upload[data-play="${uploads[i].id}"]`);
+      if (b && d.signedUrl) b.insertAdjacentHTML("afterbegin", `<video src="${esc(d.signedUrl)}#t=0.1" preload="metadata" muted playsinline aria-hidden="true"></video>`);
+    }));
+
   main.querySelectorAll("[data-muscle]").forEach((b) => (b.onclick = () => { muscle = b.dataset.muscle; draw(main, isCoach); }));
   main.querySelectorAll("[data-play]").forEach((b) => (b.onclick = async () => {
     const e = list.find((x) => x.id == b.dataset.play);
