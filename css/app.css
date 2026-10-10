@@ -315,3 +315,24 @@ textarea.tall{min-height:240px}
 }
 .sheet-text{color:var(--ink-2)}
 .empty.gap-top{margin-top:24px}
+
+/* ---------- حركة خفيفة (بتتقفل لوحدها مع «تقليل الحركة» من base.css) ---------- */
+/* المحتوى بيظهر بنعومة كل ما الصفحة أو العضلة تتغير. العنوان والتبويبات ثابتين عشان ما يرمشوش.
+   backwards مش both: عشان ما يفضلش transform بعد الحركة */
+.main > :not(.view-head):not(.index){animation:enter .22s ease-out backwards}
+@keyframes enter{from{opacity:0;transform:translateY(4px)}}
+
+/* النوافذ */
+dialog[open]{animation:pop .2s ease-out}
+dialog[open]::backdrop{animation:fade .2s ease-out}
+@keyframes pop{from{opacity:0;transform:scale(.98)}}
+@keyframes fade{from{opacity:0}}
+
+/* الخط الأصفر تحت العضلة بيتمد من النص */
+.mt[aria-selected="true"]::after{animation:grow .25s ease-out}
+@keyframes grow{from{transform:scaleX(0)}}
+
+@media (max-width:640px){
+  dialog.sheet[open]{animation:rise .25s cubic-bezier(.2,.7,.2,1)}
+  @keyframes rise{from{transform:translateY(24px);opacity:0}}
+}

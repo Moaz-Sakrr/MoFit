@@ -36,6 +36,8 @@ button{font:inherit;color:inherit}
 .btn-ink{background:var(--ink);color:var(--paper)}
 .btn-sm{padding:6px 14px;font-size:.85rem;border-width:1.5px}
 .btn:disabled{opacity:.45;cursor:default}
+.btn{transition:background-color .15s,color .15s,border-color .15s,transform .1s}
+.btn:active:not(:disabled){transform:scale(.97)}
 
 input,select,textarea{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:10px 12px;width:100%}
 textarea{min-height:110px;line-height:1.7;resize:vertical}
