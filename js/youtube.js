@@ -46,6 +46,9 @@ export function openFile(src, title) {
   frame.innerHTML = "";
   const v = document.createElement("video");
   v.src = src; v.controls = true; v.autoplay = true; v.playsInline = true;
+  // بيشيل زرار التحميل وقايمة كليك يمين (فيها «حفظ الفيديو»). ده بيصعّبها على المتدرب العادي بس، مش حماية كاملة
+  v.setAttribute("controlsList", "nodownload");
+  v.oncontextmenu = (e) => e.preventDefault();
   frame.appendChild(v);
   dlg.showModal();
 }
