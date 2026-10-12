@@ -288,7 +288,7 @@ textarea.tall{min-height:240px}
 
   /* لوحة المتدربين: كروت بدل جدول عريض */
   .summary{grid-template-columns:1fr 1fr;margin-bottom:20px}
-  .summary button:first-child{grid-column:1/-1}
+  .summary button:first-child,.summary button:last-child:nth-child(even){grid-column:1/-1} /* آخر خانة لوحدها في صفها تاخد العرض كله بدل ما يفضل جنبها مربع فاضي */
   .summary button{padding:14px 16px}
   .toolbar{margin-bottom:14px}
   .toolbar input{max-width:none}

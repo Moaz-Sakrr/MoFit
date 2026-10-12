@@ -30,7 +30,7 @@ button{font:inherit;color:inherit}
 .logo{font-family:"Readex Pro",system-ui,sans-serif;font-weight:700;font-size:1.55rem;letter-spacing:-.02em;direction:ltr;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
 .logo i{width:12px;height:22px;background:var(--tape);transform:skewX(-14deg)}
 
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:2px solid transparent;border-radius:4px;padding:12px 24px;font-weight:600;font-size:.98rem;cursor:pointer;text-decoration:none;line-height:1.2;background:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:2px solid transparent;border-radius:4px;padding:12px 24px;font-weight:600;font-size:.98rem;cursor:pointer;text-decoration:none;line-height:1.2;background:none;text-align:center}
 .btn-tape{background:var(--tape);color:var(--tape-ink)}
 .btn-ghost{border-color:currentColor}
 .btn-ink{background:var(--ink);color:var(--paper)}
@@ -40,6 +40,9 @@ button{font:inherit;color:inherit}
 .btn:active:not(:disabled){transform:scale(.97)}
 
 input,select,textarea{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:10px 12px;width:100%}
+/* سفاري الآيفون بيدّي خانة التاريخ عرض ثابت بيطلع برة الكارت، وبيوسّط التاريخ */
+input[type=date]{-webkit-appearance:none;appearance:none;min-width:0;display:block}
+input[type=date]::-webkit-date-and-time-value{text-align:start}
 textarea{min-height:110px;line-height:1.7;resize:vertical}
 .field{display:flex;flex-direction:column;gap:6px;min-width:0}
 .field label{font-weight:600;font-size:.9rem}
