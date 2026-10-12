@@ -1,5 +1,6 @@
 /* الصفحة الرئيسية: غلاف، تعريف، نتايج، تواصل */
-.nav{position:absolute;top:0;inset-inline:0;z-index:10;color:#fff}
+/* تدرّج غامق فوق عشان اللوجو واللينكات يبانوا حتى لو الصورة تحتهم فاتحة */
+.nav{position:absolute;top:0;inset-inline:0;z-index:10;color:#fff;background:linear-gradient(to bottom,rgb(10 11 12/.8),rgb(10 11 12/0))}
 .nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:76px}
 .nav-links{display:flex;gap:26px;align-items:center}
 .nav-links a{text-decoration:none;font-size:.95rem;opacity:.82}
@@ -111,7 +112,6 @@ footer .credits a:hover{border-bottom-color:var(--tape)}
 
 /* ---------- موبايل ---------- */
 @media (max-width:640px){
-  .nav{background:linear-gradient(to bottom,rgb(10 11 12/.8),rgb(10 11 12/0))}
   .nav .wrap{min-height:64px}
   .hero-copy .inner{gap:18px}
   .cta-row{gap:10px}
