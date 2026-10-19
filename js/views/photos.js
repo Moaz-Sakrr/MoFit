@@ -8,12 +8,18 @@ export const BUCKET = "progress-photos";
 export const PERIOD_LABEL = { start: "أول الشهر", end: "آخر الشهر" };
 export const monthLabel = (m) => new Date(m + "T00:00:00").toLocaleDateString("ar-EG", { month: "long", year: "numeric" });
 
-// روابط مؤقتة للصور (المخزن خاص): {path: url}
+// روابط مؤقتة للملفات (المخزن خاص): {path: url}
+// بنعيد استخدام نفس الرابط طول ما هو صالح، لأن رابط جديد = المتصفح ينزّل الملف من الأول (ده كان بيستهلك الـ Cached Egress)
+const signed = {};
 export async function signPaths(paths) {
-  if (!paths.length) return {};
-  const { data, error } = await supabase.storage.from(BUCKET).createSignedUrls(paths, 3600);
-  if (error) throw error;
-  return Object.fromEntries(data.filter((d) => d.signedUrl).map((d) => [d.path, d.signedUrl]));
+  const now = Date.now();
+  const need = paths.filter((p) => !(signed[p]?.exp > now));
+  if (need.length) {
+    const { data, error } = await supabase.storage.from(BUCKET).createSignedUrls(need, 3600);
+    if (error) throw error;
+    data.forEach((d) => d.signedUrl && (signed[d.path] = { url: d.signedUrl, exp: now + 55 * 60e3 }));
+  }
+  return Object.fromEntries(paths.filter((p) => signed[p]).map((p) => [p, signed[p].url]));
 }
 
 let list = [];

@@ -1,6 +1,6 @@
 // صفحة التمارين: متقسمة على العضلات، وكل تمرين معاه فيديو يتفتح جوه الموقع
 import { supabase, esc } from "../supabase.js";
-import { youtubeId, thumbnail, openVideo, openFile } from "../youtube.js";
+import { youtubeId, thumbnail, openVideo } from "../youtube.js";
 import { toast, openSheet, confirmSheet, loadingView } from "../ui.js";
 
 export const MUSCLES = [
@@ -8,8 +8,6 @@ export const MUSCLES = [
   ["arms", "الذراع"], ["legs", "الأرجل"], ["abs", "البطن"],
 ];
 
-const VIDEOS = "exercise-videos";
-const MAX_VIDEO = 50 * 1024 * 1024;
 let muscle = "chest";
 let list = [];
 
@@ -30,10 +28,7 @@ function draw(main, isCoach) {
 
   const rows = shown.map((e) => {
     const vid = youtubeId(e.youtube_url);
-    const thumb = e.video_path
-      ? `<button class="thumb upload" type="button" data-play="${e.id}" aria-label="شغّل فيديو ${esc(e.name)}">
-           <span class="play"><span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></span></button>`
-      : vid
+    const thumb = vid
       ? `<button class="thumb" type="button" data-play="${e.id}" aria-label="شغّل فيديو ${esc(e.name)}">
            <img src="${thumbnail(vid)}" alt="" loading="lazy">
            <span class="play"><span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></span></button>`
@@ -54,14 +49,6 @@ function draw(main, isCoach) {
     <div class="index" role="tablist">${tabs}</div>
     ${shown.length ? `<ul class="rows">${rows}</ul>` : `<div class="empty gap-top">مفيش تمارين للعضلة دي لسه.</div>`}`;
 
-  // الفيديوهات المرفوعة ملهاش صورة، فبنعرض أول فريم منها (#t=0.1 بيخلّي المتصفح يرسمه)
-  const uploads = shown.filter((e) => e.video_path);
-  if (uploads.length) supabase.storage.from(VIDEOS).createSignedUrls(uploads.map((e) => e.video_path), 3600).then(({ data }) =>
-    (data || []).forEach((d, i) => {
-      const b = main.querySelector(`.thumb.upload[data-play="${uploads[i].id}"]`);
-      if (b && d.signedUrl) b.insertAdjacentHTML("afterbegin", `<video src="${esc(d.signedUrl)}#t=0.1" preload="metadata" muted playsinline aria-hidden="true"></video>`);
-    }));
-
   // الشرح متقصوص لسطرين على الموبايل بس، فالزرار بيظهر لو فيه كلام مستخبي فعلاً
   main.querySelectorAll(".cues").forEach((p) => {
     if (p.scrollHeight <= p.clientHeight + 1) return;
@@ -75,12 +62,9 @@ function draw(main, isCoach) {
   });
 
   main.querySelectorAll("[data-muscle]").forEach((b) => (b.onclick = () => { muscle = b.dataset.muscle; draw(main, isCoach); }));
-  main.querySelectorAll("[data-play]").forEach((b) => (b.onclick = async () => {
+  main.querySelectorAll("[data-play]").forEach((b) => (b.onclick = () => {
     const e = list.find((x) => x.id == b.dataset.play);
-    if (!e.video_path) return openVideo(e.youtube_url, e.name);
-    const { data, error } = await supabase.storage.from(VIDEOS).createSignedUrl(e.video_path, 3600);
-    if (error) return toast("ما قدرناش نفتح الفيديو: " + error.message, true);
-    openFile(data.signedUrl, e.name);
+    openVideo(e.youtube_url, e.name);
   }));
   if (!isCoach) return;
   main.querySelector("#add-ex").onclick = () => editExercise(main, null);
@@ -90,7 +74,6 @@ function draw(main, isCoach) {
     confirmSheet(`حذف «${e.name}»؟`, "التمرين هيتشال من عند كل المتدربين.", async () => {
       const { error } = await supabase.from("exercises").delete().eq("id", e.id);
       if (error) throw error;
-      if (e.video_path) await supabase.storage.from(VIDEOS).remove([e.video_path]).catch(() => {});
       list = list.filter((x) => x.id !== e.id);
       draw(main, isCoach); toast("التمرين اتحذف");
     });
@@ -108,29 +91,14 @@ function editExercise(main, e) {
       { k: "reps", label: "عدد العدات", ph: "8-12" },
       { k: "cues", label: "طريقة الأداء", type: "textarea" },
       { k: "youtube_url", label: "لينك فيديو اليوتيوب", ltr: true, ph: "https://youtu.be/...", hint: "ينفع لينك عادي أو Shorts" },
-      { k: "video", label: "أو ارفع فيديو من جهازك", type: "file", accept: "video/mp4,video/webm,video/quicktime", hint: "MP4 أفضل، وأقصى حجم ٥٠ ميجا. لو رفعت فيديو هو اللي هيظهر بدل لينك اليوتيوب." + (e && e.video_path ? " فيه فيديو مرفوع بالفعل، رفع فيديو جديد هيبدّله." : "") },
-      ...(e && e.video_path ? [{ k: "remove_video", label: "الفيديو المرفوع", type: "select", options: [["", "سيبه زي ما هو"], ["1", "احذفه"]] }] : []),
       { k: "sort", label: "الترتيب", type: "number", hint: "الرقم الأصغر يظهر الأول" },
     ],
     async onSave(v) {
       if (v.youtube_url && !youtubeId(v.youtube_url)) throw new Error("لينك اليوتيوب مش صح. انسخه من زرار Share في يوتيوب.");
-      const { video, remove_video, ...row } = v;
-      row.sort = parseInt(row.sort) || 0;
-      if (video && video.size > MAX_VIDEO) throw new Error("الفيديو أكبر من ٥٠ ميجا. صغّره الأول.");
-      let newPath = null;
-      if (video) {
-        newPath = crypto.randomUUID() + "." + ((video.name.split(".").pop() || "mp4").toLowerCase().replace(/[^a-z0-9]/g, "") || "mp4");
-        const up = await supabase.storage.from(VIDEOS).upload(newPath, video, { contentType: video.type || "video/mp4" });
-        if (up.error) throw up.error;
-        row.video_path = newPath;
-      } else if (remove_video === "1") row.video_path = "";
+      const row = { ...v, sort: parseInt(v.sort) || 0 };
       const q = e ? supabase.from("exercises").update(row).eq("id", e.id) : supabase.from("exercises").insert(row);
       const { data, error } = await q.select().single();
-      if (error) {
-        if (newPath) await supabase.storage.from(VIDEOS).remove([newPath]).catch(() => {});
-        throw error;
-      }
-      if (e && e.video_path && e.video_path !== data.video_path) await supabase.storage.from(VIDEOS).remove([e.video_path]).catch(() => {});
+      if (error) throw error;
       if (e) Object.assign(e, data); else list.push(data);
       muscle = data.muscle;
       draw(main, true);

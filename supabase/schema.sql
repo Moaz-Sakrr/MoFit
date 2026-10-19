@@ -164,21 +164,12 @@ select * from (values
 ) as v(title,goal,before_url,after_url,sort)
 where not exists (select 1 from public.results);
 
--- 7.6) فيديوهات التمارين المرفوعة من جهاز الكوتش -------------------------
-alter table public.exercises add column if not exists video_path text not null default '';
-
--- مخزن خاص: المتدرب المفعّل والكوتش بس يشوفوا الفيديو. الحد 50 ميجا (حد الخطة المجانية)
-insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values ('exercise-videos', 'exercise-videos', false, 52428800, array['video/mp4','video/webm','video/quicktime'])
-on conflict (id) do update set file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
+-- 7.6) فيديوهات التمارين بقت لينكات يوتيوب بس، فبنشيل بقايا الرفع القديم (المخزن نفسه بيتمسح من الداشبورد)
 drop policy if exists "videos read"   on storage.objects;
 drop policy if exists "videos insert" on storage.objects;
 drop policy if exists "videos update" on storage.objects;
 drop policy if exists "videos delete" on storage.objects;
-create policy "videos read"   on storage.objects for select using (bucket_id = 'exercise-videos' and (public.is_coach() or public.is_active_member()));
-create policy "videos insert" on storage.objects for insert with check (bucket_id = 'exercise-videos' and public.is_coach());
-create policy "videos update" on storage.objects for update using (bucket_id = 'exercise-videos' and public.is_coach());
-create policy "videos delete" on storage.objects for delete using (bucket_id = 'exercise-videos' and public.is_coach());
+alter table public.exercises drop column if exists video_path;
 
 -- 7.7) صور متابعة المتدربين ------------------------------------------------
 -- المتدرب يرفع من 1 لـ 3 صور أول الشهر وآخره. الكوتش يشوفها دايماً للمتابعة،

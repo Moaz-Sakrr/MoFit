@@ -230,9 +230,6 @@ textarea.tall{min-height:240px}
 @keyframes sk{from{background-position:100% 0}to{background-position:-100% 0}}
 
 .video-frame video{position:absolute;inset:0;width:100%;height:100%;background:#000;object-fit:contain}
-.thumb.upload{background:var(--night);display:grid;place-items:center}
-.thumb.upload .play{background:none}
-.thumb.upload video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
 
 /* ---------- موبايل ---------- */
 @media (max-width:640px){

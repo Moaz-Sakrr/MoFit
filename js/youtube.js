@@ -39,20 +39,6 @@ export function openVideo(url, title) {
   dlg.showModal();
 }
 
-// فيديو مرفوع من جهاز الكوتش (رابط مؤقت من Supabase)
-export function openFile(src, title) {
-  document.getElementById("video-title").textContent = title || "";
-  dlg.classList.remove("vertical");
-  frame.innerHTML = "";
-  const v = document.createElement("video");
-  v.src = src; v.controls = true; v.autoplay = true; v.playsInline = true;
-  // بيشيل زرار التحميل وقايمة كليك يمين (فيها «حفظ الفيديو»). ده بيصعّبها على المتدرب العادي بس، مش حماية كاملة
-  v.setAttribute("controlsList", "nodownload");
-  v.oncontextmenu = (e) => e.preventDefault();
-  frame.appendChild(v);
-  dlg.showModal();
-}
-
 // لما النافذة تتقفل نشيل الفيديو عشان الصوت يقف
 dlg.addEventListener("close", () => (frame.innerHTML = ""));
 document.getElementById("video-close").onclick = () => dlg.close();
