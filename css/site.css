@@ -70,6 +70,18 @@
 .res h3{font-size:1.8rem}
 .res .meta{font-size:.9rem;color:var(--night-mute)}
 
+/* آراء المشتركين */
+.reviews{padding-block:clamp(72px,10vw,120px)}
+.reviews + .members-cta{border-top:1px solid var(--rule)}
+.rev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:clamp(20px,3vw,32px);align-items:start}
+.rev{margin:0;background:var(--paper-2);border-radius:8px;padding:26px 24px 22px;display:flex;flex-direction:column;gap:14px;border-top:4px solid var(--tape);min-width:0}
+.rev-stars{color:var(--tape);font-size:1.2rem;letter-spacing:2px;line-height:1}
+.rev-stars i{font-style:normal;color:color-mix(in srgb,var(--ink) 20%,transparent)}
+.rev blockquote{margin:0;font-size:1.05rem;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere}
+.rev blockquote::before{content:"“";display:block;font-family:var(--display);font-size:3rem;line-height:.6;color:var(--tape);margin-bottom:6px}
+.rev figcaption{font-family:var(--display);font-weight:700;font-size:1.15rem;color:var(--ink-2)}
+.rev figcaption::before{content:"— "}
+
 .members-cta{padding-block:clamp(64px,8vw,96px)}
 .members-cta .wrap{display:grid;grid-template-columns:1.3fr 1fr;gap:32px;align-items:center}
 @media (max-width:820px){.members-cta .wrap{grid-template-columns:1fr}}

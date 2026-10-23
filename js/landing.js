@@ -25,3 +25,18 @@ async function load() {
   bindSliders();
 }
 load();
+
+// آراء المشتركين اللي الكوتش اختارها (الاسم الأول والتقييم والنص بس)
+async function loadReviews() {
+  const box = document.getElementById("reviews");
+  if (!isConfigured || !box) return;
+  const { data, error } = await supabase.rpc("public_feedback");
+  if (error || !data.length) return;
+  box.querySelector(".rev-grid").innerHTML = data.map((r) => `<figure class="rev">
+      <span class="rev-stars" role="img" aria-label="التقييم ${r.rating} من 5">${"★".repeat(r.rating)}<i>${"★".repeat(5 - r.rating)}</i></span>
+      <blockquote>${esc(r.message)}</blockquote>
+      <figcaption>${esc(r.name)}</figcaption>
+    </figure>`).join("");
+  box.hidden = false;
+}
+loadReviews();

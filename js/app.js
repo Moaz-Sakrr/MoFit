@@ -9,6 +9,7 @@ import { renderMembers, memberStatus } from "./views/members.js";
 import { renderResults } from "./views/results.js";
 import { renderPhotos } from "./views/photos.js";
 import { renderProgress } from "./views/progress.js";
+import { renderFeedback } from "./views/feedback.js";
 
 const $ = (id) => document.getElementById(id);
 const main = $("main");
@@ -46,7 +47,7 @@ function route() {
   const myId = ++routeId;
   const isCoach = profile.role === "coach";
   let view = location.hash.slice(1) || (isCoach ? "members" : "exercises");
-  if (["members", "results", "progress"].includes(view) && !isCoach) view = "exercises";
+  if (["members", "results", "progress", "feedback"].includes(view) && !isCoach) view = "exercises";
   if (view === "photos" && isCoach) view = "progress";
 
   document.querySelectorAll("#side-nav a").forEach((a) => {
@@ -60,6 +61,7 @@ function route() {
   if (view === "members") return renderMembers(main, ctx);
   if (view === "results") return renderResults(main, ctx);
   if (view === "progress") return renderProgress(main, ctx);
+  if (view === "feedback") return renderFeedback(main, ctx);
   if (view === "photos") return renderPhotos(main, ctx);
   if (!canTrain()) return drawLocked();
   if (view === "programs") return renderPrograms(main, ctx);
