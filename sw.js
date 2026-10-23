@@ -1,6 +1,6 @@
 // Service worker بسيط: بيخلّي الموقع يتثبّت كتطبيق، ومش بيخزّن حاجة قديمة.
 // بنجيب من النت الأول دايماً، ولو مفيش نت بنرجع لآخر نسخة اتفتحت. طلبات Supabase والفيديو مش بتعدّي عليه.
-const CACHE = "mofit-v2";
+const CACHE = "mofit-v3";
 
 self.addEventListener("install", () => self.skipWaiting());
 
@@ -16,7 +16,8 @@ self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET" || new URL(req.url).origin !== self.location.origin) return;
   e.respondWith(
-    fetch(req)
+    // no-cache: نسأل السيرفر كل مرة لو الملف اتغيّر، عشان cache المتصفح ما يرجّعش نسخة قديمة بعد أي تحديث
+    fetch(req, { cache: "no-cache" })
       .then((res) => {
         if (res.ok && res.type === "basic") {
           const copy = res.clone();
