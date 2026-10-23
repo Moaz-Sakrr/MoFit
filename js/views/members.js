@@ -70,7 +70,6 @@ function draw(main) {
         ${p.is_active
           ? `<button class="btn btn-ghost btn-sm" type="button" data-toggle>إيقاف</button>`
           : `<button class="btn btn-ink btn-sm" type="button" data-toggle>تفعيل</button>`}
-        <a class="btn btn-tape btn-sm" href="#plan/${p.id}">الخطة</a>
         <button class="btn btn-ghost btn-sm" type="button" data-add="1">+ شهر</button>
         <button class="btn btn-ghost btn-sm" type="button" data-add="3">+ ٣ شهور</button>
         <button class="btn btn-ghost btn-sm btn-del" type="button" data-del>حذف</button>
