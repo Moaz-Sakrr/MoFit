@@ -360,7 +360,7 @@ language sql stable security definer set search_path = public as $$
   from feedback f join profiles p on p.id = f.member_id
   where f.featured and f.allow_public
   order by f.created_at desc
-  limit 12;
+  limit 50;
 $$;
 revoke all on function public.public_feedback() from public;
 grant execute on function public.public_feedback() to anon, authenticated;
