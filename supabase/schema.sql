@@ -15,6 +15,8 @@ create table if not exists public.profiles (
   notes            text not null default '',
   created_at       timestamptz not null default now()
 );
+-- آخر مرة المتدرب بعت فيها رأيه (بيتحدّث من trigger الـ feedback بس)
+alter table public.profiles add column if not exists last_feedback_at timestamptz;
 
 -- 2) التمارين ----------------------------------------------------------
 create table if not exists public.exercises (
@@ -93,6 +95,10 @@ begin
     new.email            := old.email;
     new.id               := old.id;
     new.created_at       := old.created_at;
+  end if;
+  -- وقت آخر feedback محدش يغيّره بإيده (ولا الكوتش)، بيتحدّث بس من trigger الـ feedback (عمق > 1)
+  if auth.uid() is not null and pg_trigger_depth() < 2 then
+    new.last_feedback_at := old.last_feedback_at;
   end if;
   return new;
 end $$;
@@ -268,6 +274,96 @@ begin
 end $$;
 revoke all on function public.delete_member(uuid) from public, anon;
 grant execute on function public.delete_member(uuid) to authenticated;
+
+-- 7.10) آراء المتدربين (feedback) -------------------------------------------------
+-- المتدرب يبعت تقييم من 1 لـ 5 ورأي مكتوب للكوتش، مرة واحدة كل 24 ساعة.
+-- الكوتش يقرا الكل ويعلّم اللي قراه. المتدرب يحذف رأيه، بس الحذف ما بيرجّعش الفرصة.
+create table if not exists public.feedback (
+  id         bigint generated always as identity primary key,
+  member_id  uuid not null default auth.uid() references public.profiles(id) on delete cascade,
+  rating     int  not null check (rating between 1 and 5),
+  message    text not null check (char_length(btrim(message)) between 1 and 1000),
+  coach_seen boolean not null default false,
+  created_at timestamptz not null default now()
+);
+-- allow_public: قرار المتدرب إن رأيه يتعرض في الصفحة الرئيسية. featured: اختيار الكوتش
+-- الرأي بيظهر للزوار بس لو الاتنين true، فلو المتدرب سحب موافقته بيختفي لوحده
+alter table public.feedback add column if not exists allow_public boolean not null default false;
+alter table public.feedback add column if not exists featured     boolean not null default false;
+create index if not exists feedback_member_idx  on public.feedback (member_id, created_at desc);
+create index if not exists feedback_created_idx on public.feedback (created_at desc);
+alter table public.feedback enable row level security;
+
+-- مرة كل 24 ساعة، والوقت محفوظ في profiles عشان الحذف ما يصفّرش العداد
+create or replace function public.feedback_once_a_day()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare last timestamptz;
+begin
+  -- الـ trigger بيشتغل قبل RLS، فنتأكد الأول إن الرأي باسم صاحبه قبل ما نلمس profile حد تاني
+  if auth.uid() is not null and new.member_id is distinct from auth.uid() then
+    raise exception 'مينفعش تبعت رأي باسم حد تاني';
+  end if;
+  -- for update: لو اتبعت طلبين في نفس اللحظة، التاني يستنى الأول ويترفض
+  select last_feedback_at into last from profiles where id = new.member_id for update;
+  if last is not null and now() < last + interval '24 hours' then
+    raise exception 'بعت رأيك في آخر ٢٤ ساعة. تقدر تبعت رأي جديد بعد %',
+      to_char((last + interval '24 hours') at time zone 'Africa/Cairo', 'YYYY-MM-DD HH24:MI');
+  end if;
+  new.created_at := now();
+  new.coach_seen := false;
+  new.featured   := false;
+  update profiles set last_feedback_at = now() where id = new.member_id;
+  return new;
+end $$;
+drop trigger if exists feedback_once_a_day on public.feedback;
+create trigger feedback_once_a_day before insert on public.feedback
+  for each row execute function public.feedback_once_a_day();
+
+-- الرأي نفسه محدش يعدّله. الكوتش يعدّل «اتقرا» و«معروض في الرئيسية»، والمتدرب يعدّل موافقته على النشر بس
+create or replace function public.protect_feedback()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  new.id         := old.id;
+  new.member_id  := old.member_id;
+  new.rating     := old.rating;
+  new.message    := old.message;
+  new.created_at := old.created_at;
+  if auth.uid() is not null then
+    if public.is_coach() then
+      new.allow_public := old.allow_public;
+    else
+      new.coach_seen := old.coach_seen;
+      new.featured   := old.featured;
+    end if;
+  end if;
+  return new;
+end $$;
+drop trigger if exists protect_feedback on public.feedback;
+create trigger protect_feedback before update on public.feedback
+  for each row execute function public.protect_feedback();
+
+-- القراءة: صاحبه والكوتش. الإضافة: المتدرب لنفسه (حتى لو اشتراكه خلص). التعديل: الاتنين (والـ trigger بيحدد مين يعدّل إيه). الحذف: صاحبه
+drop policy if exists "feedback read"   on public.feedback;
+drop policy if exists "feedback insert" on public.feedback;
+drop policy if exists "feedback update" on public.feedback;
+drop policy if exists "feedback delete" on public.feedback;
+create policy "feedback read"   on public.feedback for select using (member_id = auth.uid() or public.is_coach());
+create policy "feedback insert" on public.feedback for insert with check (member_id = auth.uid() and not public.is_coach());
+create policy "feedback update" on public.feedback for update using (member_id = auth.uid() or public.is_coach()) with check (member_id = auth.uid() or public.is_coach());
+create policy "feedback delete" on public.feedback for delete using (member_id = auth.uid());
+
+-- آراء الصفحة الرئيسية: الزوار مش بيقروا الجدول نفسه، بياخدوا الاسم الأول والتقييم والنص بس
+create or replace function public.public_feedback()
+returns table (name text, rating int, message text, created_at timestamptz)
+language sql stable security definer set search_path = public as $$
+  select coalesce(nullif(split_part(btrim(p.full_name), ' ', 1), ''), 'متدرب'), f.rating, f.message, f.created_at
+  from feedback f join profiles p on p.id = f.member_id
+  where f.featured and f.allow_public
+  order by f.created_at desc
+  limit 50;
+$$;
+revoke all on function public.public_feedback() from public;
+grant execute on function public.public_feedback() to anon, authenticated;
 
 -- 7.11) خطط التمرين الشخصية وتسجيل الأوزان ------------------------------------
 -- الكوتش يبني لكل متدرب خطة (أيام ← تمارين من مكتبة التمارين الموجودة). المتدرب يسجّل وزن وعدات كل مجموعة.

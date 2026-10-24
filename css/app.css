@@ -313,6 +313,44 @@ textarea.tall{min-height:240px}
 .sheet-text{color:var(--ink-2)}
 .empty.gap-top{margin-top:24px}
 
+/* ---------- آراء المتدربين (feedback) ---------- */
+.panel.fb{grid-column:1/-1}
+.fb-sub{color:var(--ink-2);font-size:.95rem;margin-top:-8px}
+.fb-form{display:flex;flex-direction:column;gap:16px}
+.fb-form .btn{align-self:flex-start}
+/* النجوم: radio مخفي + label. بالـ RTL أول نجمة على اليمين */
+.stars{border:0;margin:0;padding:0;position:relative;min-width:0}
+.stars legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:4px}
+.stars label{display:inline-block;font-size:2.1rem;line-height:1;padding:2px 3px;cursor:pointer;color:color-mix(in srgb,var(--ink) 22%,transparent);transition:color .1s,transform .1s}
+.stars input:checked + label,.stars label:has(~ input:checked){color:var(--tape)}
+.stars:has(label:hover) label{color:color-mix(in srgb,var(--ink) 22%,transparent)}
+.stars:has(label:hover) label:hover,.stars:has(label:hover) label:has(~ label:hover){color:var(--tape)}
+.stars label:hover{transform:scale(1.12)}
+.stars input:focus-visible + label{outline:3px solid var(--tape);outline-offset:2px;border-radius:4px}
+.fb-stars{color:var(--tape);letter-spacing:1px;font-size:1.05rem;white-space:nowrap}
+.fb-stars i{font-style:normal;color:color-mix(in srgb,var(--ink) 22%,transparent)}
+.fb-h{font-size:1.25rem;margin-top:8px}
+.fb-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.fb-item{display:flex;flex-direction:column;gap:8px;padding-bottom:12px;border-bottom:1px solid var(--rule)}
+.fb-list .fb-item:last-child{border-bottom:0;padding-bottom:0}
+.fb-top{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px}
+.fb-top b{font-size:1.1rem}
+.fb-date{color:var(--ink-2);font-size:.85rem}
+.fb-msg{white-space:pre-wrap;overflow-wrap:anywhere;max-width:70ch}
+.fb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr));gap:20px}
+.fb-card{background:var(--paper-2);border-radius:8px;padding:18px;border:0}
+.fb-card.new{box-shadow:inset -4px 0 0 var(--tape)}
+.summary .stat{background:var(--paper-2);padding:16px 18px;display:flex;flex-direction:column;gap:2px}
+.summary .stat b{font-size:2rem;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.summary .stat span{font-size:.88rem;color:var(--ink-2)}
+.fb-public{align-items:center;padding-top:10px;border-top:1px solid var(--rule)}
+.fb-note{color:var(--ink-2);font-size:.85rem}
+@media (max-width:640px){
+  .stars label{font-size:2.4rem;padding:4px}
+  .fb-form .btn{align-self:stretch}
+  .summary .stat{grid-column:1/-1;padding:14px 16px}
+}
+
 /* ---------- حركة خفيفة (بتتقفل لوحدها مع «تقليل الحركة» من base.css) ---------- */
 /* المحتوى بيظهر بنعومة كل ما الصفحة أو العضلة تتغير. العنوان والتبويبات ثابتين عشان ما يرمشوش.
    backwards مش both: عشان ما يفضلش transform بعد الحركة */

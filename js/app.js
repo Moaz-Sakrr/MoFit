@@ -9,6 +9,7 @@ import { renderMembers, memberStatus } from "./views/members.js";
 import { renderResults } from "./views/results.js";
 import { renderPhotos } from "./views/photos.js";
 import { renderProgress } from "./views/progress.js";
+import { renderFeedback } from "./views/feedback.js";
 import { renderMyPlan, renderPlanBuilder } from "./views/plan.js";
 import { renderWorkout } from "./views/workout.js";
 
@@ -50,7 +51,7 @@ function route() {
   const isCoach = profile.role === "coach";
   const [hashView, arg] = (location.hash.slice(1) || (isCoach ? "members" : "exercises")).split("/");
   let view = hashView;
-  if (["members", "results", "progress", "plan"].includes(view) && !isCoach) view = "exercises";
+  if (["members", "results", "progress", "plan", "feedback"].includes(view) && !isCoach) view = "exercises";
   if (["myplan", "workout"].includes(view) && isCoach) view = "members";
   if (view === "photos" && isCoach) view = "progress";
 
@@ -65,6 +66,7 @@ function route() {
   if (view === "members") return renderMembers(main, ctx);
   if (view === "results") return renderResults(main, ctx);
   if (view === "progress") return renderProgress(main, ctx);
+  if (view === "feedback") return renderFeedback(main, ctx);
   if (view === "photos") return renderPhotos(main, ctx);
   if (view === "plan") return arg ? renderPlanBuilder(main, ctx, arg) : renderMembers(main, ctx);
   if (!canTrain()) return drawLocked();

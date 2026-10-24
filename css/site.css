@@ -70,6 +70,22 @@
 .res h3{font-size:1.8rem}
 .res .meta{font-size:.9rem;color:var(--night-mute)}
 
+/* آراء المشتركين */
+.reviews{padding-block:clamp(72px,10vw,120px)}
+.reviews + .members-cta{border-top:1px solid var(--rule)}
+.rev-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(20px,3vw,32px)}
+@media (max-width:900px) and (min-width:641px){.rev-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.rev-grid{grid-template-columns:1fr}}
+/* ارتفاع ثابت (٥ سطور للرأي) عشان الصفحة ما تتحركش لما الرأي يتغيّر */
+.rev{position:relative;margin:0;background:var(--paper-2);border-radius:8px;padding:26px 24px 22px;display:flex;flex-direction:column;gap:14px;border-top:4px solid var(--tape);min-width:0;transition:opacity .25s ease,transform .25s ease}
+.rev.out{opacity:0;transform:translateY(6px)}
+.rev::after{content:"”";position:absolute;top:14px;inset-inline-end:20px;font-family:var(--display);font-size:3.6rem;line-height:1;color:var(--tape);opacity:.55;pointer-events:none}
+.rev-stars{color:var(--tape);font-size:1.2rem;letter-spacing:2px;line-height:1}
+.rev-stars i{font-style:normal;color:color-mix(in srgb,var(--ink) 20%,transparent)}
+.rev blockquote{margin:0;font-size:1.05rem;line-height:1.8;height:9em;white-space:pre-wrap;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:5;overflow:hidden}
+.rev figcaption{font-family:var(--display);font-weight:700;font-size:1.15rem;color:var(--ink-2);margin-top:auto}
+.rev figcaption::before{content:"— "}
+
 .members-cta{padding-block:clamp(64px,8vw,96px)}
 .members-cta .wrap{display:grid;grid-template-columns:1.3fr 1fr;gap:32px;align-items:center}
 @media (max-width:820px){.members-cta .wrap{grid-template-columns:1fr}}
