@@ -269,7 +269,7 @@ end $$;
 revoke all on function public.delete_member(uuid) from public, anon;
 grant execute on function public.delete_member(uuid) to authenticated;
 
--- 7.10) خطط التمرين الشخصية وتسجيل الأوزان ------------------------------------
+-- 7.11) خطط التمرين الشخصية وتسجيل الأوزان ------------------------------------
 -- الكوتش يبني لكل متدرب خطة (أيام ← تمارين من مكتبة التمارين الموجودة). المتدرب يسجّل وزن وعدات كل مجموعة.
 -- السجلات (workout_sessions / set_logs) مش مربوطة بصفوف الخطة، فتعديل الخطة أو حذفها ما بيمسحش التاريخ.
 create table if not exists public.workout_plans (
