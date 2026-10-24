@@ -34,7 +34,7 @@
 - كل PR لازم يكون **base: `develop`** (خد بالك: GitHub بيفتح PR على `main` لو ما غيّرتش الـ base).
 - قرار المالك: الـ features متنزلش على الموقع الحقيقي لحد ما نخلّص كذا feature وننزلهم كلهم مع بعض. متدمجش في `main` ولا تقترح كده من نفسك.
 - قبل أول إصدار: `main` فيه commit revert (`626230d`) لـ feature خطط التمرين اللي اتدمجت بالغلط، فلازم نعمل `git revert 626230d` على `main` الأول، وبعدين ندمج `develop`. من غير كده Git مش هيرجّع الـ feature.
-- مفيش `gh` على الجهاز. الـ PR بيتفتح من المتصفح، فاديه المستخدم لينك `https://github.com/Moaz-Sakrr/MoFit/compare/develop...<branch>?expand=1`.
+- `gh` متسطّب ومسجّل دخول. افتح الـ PR بـ `gh pr create --base develop` (لو `gh` مش متعرّف في الـ terminal، استخدم المسار الكامل `"C:\Program Files\GitHub CLI\gh.exe"`).
 - الـ check الأحمر "Workers Builds: mofit" على أي branch غير `main` عادي وما بيمنعش الدمج.
 - شغل واحد بس على الـ working folder في نفس الوقت: متبدّلش branch لو في جلسة تانية شغالة على نفس الفولدر.
 
