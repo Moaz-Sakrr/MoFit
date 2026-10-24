@@ -1,0 +1,16 @@
+# أسرار وإعدادات محلية
+.env
+.env.*
+*.local
+.claude/settings.local.json
+
+# نظام التشغيل والمحررات
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# أدوات
+node_modules/
+*.log

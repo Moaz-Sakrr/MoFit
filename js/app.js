@@ -10,6 +10,8 @@ import { renderResults } from "./views/results.js";
 import { renderPhotos } from "./views/photos.js";
 import { renderProgress } from "./views/progress.js";
 import { renderFeedback } from "./views/feedback.js";
+import { renderMyPlan, renderPlanBuilder } from "./views/plan.js";
+import { renderWorkout } from "./views/workout.js";
 
 const $ = (id) => document.getElementById(id);
 const main = $("main");
@@ -37,6 +39,7 @@ function drawSidebar() {
   $("me-status").innerHTML = `<span class="pill ${st}">${STATUS_LABEL[st]}</span>`;
   $("coach-nav").hidden = profile.role !== "coach";
   $("photos-nav").hidden = profile.role === "coach";
+  $("plan-nav").hidden = profile.role === "coach";
 }
 
 // هل المتدرب يقدر يشوف التمارين والجداول؟
@@ -46,8 +49,10 @@ let routeId = 0;
 function route() {
   const myId = ++routeId;
   const isCoach = profile.role === "coach";
-  let view = location.hash.slice(1) || (isCoach ? "members" : "exercises");
-  if (["members", "results", "progress", "feedback"].includes(view) && !isCoach) view = "exercises";
+  const [hashView, arg] = (location.hash.slice(1) || (isCoach ? "members" : "exercises")).split("/");
+  let view = hashView;
+  if (["members", "results", "progress", "plan", "feedback"].includes(view) && !isCoach) view = "exercises";
+  if (["myplan", "workout"].includes(view) && isCoach) view = "members";
   if (view === "photos" && isCoach) view = "progress";
 
   document.querySelectorAll("#side-nav a").forEach((a) => {
@@ -63,7 +68,10 @@ function route() {
   if (view === "progress") return renderProgress(main, ctx);
   if (view === "feedback") return renderFeedback(main, ctx);
   if (view === "photos") return renderPhotos(main, ctx);
+  if (view === "plan") return arg ? renderPlanBuilder(main, ctx, arg) : renderMembers(main, ctx);
   if (!canTrain()) return drawLocked();
+  if (view === "myplan") return renderMyPlan(main, ctx);
+  if (view === "workout" && arg) return renderWorkout(main, ctx, arg);
   if (view === "programs") return renderPrograms(main, ctx);
   return renderExercises(main, ctx);
 }
