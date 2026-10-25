@@ -86,6 +86,7 @@ export async function renderWorkout(main, { profile, stale }, dayId) {
   const done = () => Object.keys(mine).length;
 
   function draw() {
+    if (stale()) return; // المتدرب راح صفحة تانية (مثلاً بعد مسح مجموعة)
     main.innerHTML = `
       <div class="view-head"><div><h1>${esc(day.name)}</h1><p><a href="#myplan">← رجوع لخطتي</a></p></div>
         <div class="dose" id="wk-progress">${done()} <em>من</em> ${total()} مجموعة</div></div>
@@ -161,6 +162,7 @@ export async function renderWorkout(main, { profile, stale }, dayId) {
         if (error) throw error;
         mine[key] = data;
         const i = logs.findIndex((l) => l.id === data.id); if (i >= 0) logs[i] = data; else logs.unshift(data);
+        if (stale()) return; // المجموعة اتحفظت، بس الصفحة اتقفلت فمفيش حاجة نحدّثها
         row.classList.add("done"); btn.className = "btn btn-ink btn-sm"; btn.innerHTML = SAVED;
         wb.textContent = w(weight); rb.textContent = reps; wb.classList.remove("ph"); rb.classList.remove("ph");
         row.classList.remove("pulse"); void row.offsetWidth; row.classList.add("pulse"); // نبضة تأكيد
@@ -203,6 +205,7 @@ export async function showHistory(exerciseId, name) {
   const { data, error } = await supabase.from("set_logs").select("*").eq("exercise_id", exerciseId)
     .order("created_at", { ascending: false }).limit(500);
   const body = form.querySelector("#hist-body");
+  if (!dlg.open || !body) return; // النافذة اتقفلت أو اتبدلت بنافذة تانية وإحنا مستنيين
   if (error) { body.innerHTML = `<div class="empty">${esc(error.message)}</div>`; return; }
   const sessions = [];
   data.forEach((l) => {

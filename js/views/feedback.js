@@ -5,6 +5,7 @@ import { toast, loadingView } from "../ui.js";
 // ★★★★☆ مع نص لقارئ الشاشة
 export const stars = (n) => `<span class="fb-stars" role="img" aria-label="التقييم ${n} من 5">${"★".repeat(n)}<i>${"★".repeat(5 - n)}</i></span>`;
 
+let isStale = () => false; // من ctx الصفحة الحالية، عشان أي حفظ بيخلص بعد ما المستخدم يمشي ما يرسمش فوق الصفحة الجديدة
 let list = [];
 let filter = "all"; // all | new | shown
 
@@ -12,6 +13,7 @@ let filter = "all"; // all | new | shown
 const shown = (r) => r.featured && r.allow_public;
 
 export async function renderFeedback(main, { stale }) {
+  isStale = stale;
   main.innerHTML = `${loadingView("list")}`;
   const { data, error } = await supabase.from("feedback").select("*, profiles(full_name,email)")
     .order("created_at", { ascending: false }).limit(300);
@@ -33,6 +35,7 @@ function publicActs(r) {
 }
 
 function draw(main) {
+  if (isStale()) return;
   const rows = filter === "new" ? list.filter((r) => !r.coach_seen) : filter === "shown" ? list.filter(shown) : list;
   const unseen = list.filter((r) => !r.coach_seen).length;
   const avg = list.length ? (list.reduce((s, r) => s + r.rating, 0) / list.length).toLocaleString("ar-EG", { maximumFractionDigits: 1 }) : "—";

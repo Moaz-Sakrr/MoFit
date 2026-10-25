@@ -38,6 +38,7 @@ export async function renderPhotos(main, ctx) {
 }
 
 function draw(main, ctx) {
+  if (ctx.stale()) return;
   const canUpload = ["active", "soon"].includes(memberStatus(ctx.profile));
   const byMonth = new Map();
   list.forEach((r) => byMonth.set(r.month, [...(byMonth.get(r.month) || []), r]));
