@@ -3,7 +3,6 @@ import { supabase, getCurrentProfile, isConfigured, esc } from "./supabase.js";
 import { COACH_WHATSAPP } from "./config.js";
 import "./pwa.js";
 import { renderExercises } from "./views/exercises.js";
-import { renderPrograms } from "./views/programs.js";
 import { renderAccount } from "./views/account.js";
 import { renderMembers, memberStatus } from "./views/members.js";
 import { renderResults } from "./views/results.js";
@@ -72,7 +71,6 @@ function route() {
   if (view === "exercises") return renderExercises(main, ctx);
   if (!canTrain()) return drawLocked();
   if (view === "workout" && arg) return renderWorkout(main, ctx, arg);
-  if (view === "programs") return renderPrograms(main, ctx);
   return isCoach ? renderMembers(main, ctx) : renderMyPlan(main, ctx);
 }
 
