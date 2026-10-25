@@ -24,12 +24,14 @@ export const thumbnail = (id) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 
 const dlg = document.getElementById("video");
 const frame = document.getElementById("video-frame");
+const setRatio = (r) => dlg.style.setProperty("--ar", r);
 
 export function openVideo(url, title) {
   const id = youtubeId(url);
   if (!id) return;
   document.getElementById("video-title").textContent = title || "";
-  dlg.classList.toggle("vertical", isShort(url));
+  // نسبة مبدئية لحد ما نعرف الحقيقية من الصورة تحت
+  setRatio(isShort(url) ? 9 / 16 : 16 / 9);
   // youtube-nocookie: نسخة اليوتيوب اللي ما بتحطش كوكيز تتبع
   const f = document.createElement("iframe");
   // fs=0: يشيل زرار التكبير من مشغّل يوتيوب، عشان آيفون بيفتح فيه الفيديو بالـ player بتاعه ويخفي العلامة المائية
@@ -43,9 +45,11 @@ export function openVideo(url, title) {
   mark.setAttribute("aria-hidden", "true");
   frame.replaceChildren(f, mark);
   dlg.showModal();
-  // فيديو بالطول بلينك عادي (مش /shorts/): oardefault صورة بمقاس الفيديو الأصلي، ولو الفيديو بالعرض بترجع صورة صغيرة بالعرض
+  // oardefault صورة بمقاس الفيديو الأصلي (طولي أو مربع أو عرضي). الفيديوهات العادية مالهاش، وبترجع صورة بديلة 120×90 فبنسيب الـ 16:9
   const img = new Image();
-  img.onload = () => { if (frame.contains(f)) dlg.classList.toggle("vertical", img.naturalHeight > img.naturalWidth); };
+  img.onload = () => {
+    if (img.naturalWidth > 120 && frame.contains(f)) setRatio(img.naturalWidth / img.naturalHeight);
+  };
   img.src = `https://i.ytimg.com/vi/${id}/oardefault.jpg`;
   supabase.auth.getSession().then(({ data: { session } }) => {
     mark.textContent = `${session?.user?.email || ""} · ${today()}`;
