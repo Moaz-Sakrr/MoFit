@@ -39,7 +39,7 @@ r=$(get "$SB_URL/rest/v1/results?select=id&limit=1"); code=${r%%|*}; body=${r#*|
 if [ "$code" = 200 ] && [ "${body:0:1}" = "[" ]; then pass "قاعدة البيانات"; else fail "قاعدة البيانات (كود $code)"; fi
 
 # 4) الأمان: زائر من غير حساب ما ينفعش يشوف أي بيانات خاصة (لازم الرد يبقى [] فاضي)
-for table in profiles exercises programs progress_photos workout_plans workout_days workout_items workout_sessions set_logs; do
+for table in profiles exercises programs progress_photos feedback workout_plans workout_days workout_items workout_sessions set_logs; do
   r=$(get "$SB_URL/rest/v1/$table?select=*&limit=1"); code=${r%%|*}; body=${r#*|}
   if [ "$code" = 200 ] && [ "$body" = "[]" ]; then pass "حماية $table"
   elif [ "$code" = 200 ]; then fail "حماية $table: في بيانات خاصة باينة لأي حد! راجع RLS في Supabase"

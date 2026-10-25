@@ -30,9 +30,10 @@ jobs:
             exit 1
           fi
 
-      - uses: supabase/setup-cli@v1
+      # متثبّتة على commit ونسخة محددة: الخطوة دي معاها باسورد الداتابيز، فما ينفعش أي تحديث يدخل من غير ما نراجعه
+      - uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1.7.3
         with:
-          version: latest
+          version: 2.121.0
 
       # نفس الطريقة اللي Supabase بتشرحها: الأدوار، وشكل الجداول، والبيانات، كل واحد في ملف
       - name: Dump database
@@ -47,12 +48,12 @@ jobs:
         run: |
           name="mofit-db-$(date -u +%Y-%m-%d)"
           tar -czf "$name.tar.gz" backup
-          gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSPHRASE" \
-            --symmetric --cipher-algo AES256 -o "$name.tar.gz.gpg" "$name.tar.gz"
+          gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 \
+            --symmetric --cipher-algo AES256 -o "$name.tar.gz.gpg" "$name.tar.gz" <<<"$BACKUP_PASSPHRASE"
           rm -rf backup "$name.tar.gz"
           echo "NAME=$name" >> "$GITHUB_ENV"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ${{ env.NAME }}
           path: ${{ env.NAME }}.tar.gz.gpg
