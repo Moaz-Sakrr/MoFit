@@ -145,8 +145,8 @@ export function renderAccount(main, ctx) {
 
       <form class="panel" id="f-profile">
         <h2>بياناتي</h2>
-        <div class="field"><label for="a-name">الاسم</label><input id="a-name" value="${esc(profile.full_name)}" required></div>
-        <div class="field"><label for="a-phone">رقم الموبايل</label><input id="a-phone" type="tel" dir="ltr" value="${esc(profile.phone)}"></div>
+        <div class="field"><label for="a-name">الاسم</label><input id="a-name" maxlength="100" value="${esc(profile.full_name)}" required></div>
+        <div class="field"><label for="a-phone">رقم الموبايل</label><input id="a-phone" maxlength="30" type="tel" dir="ltr" value="${esc(profile.phone)}"></div>
         <button class="btn btn-ink" type="submit">حفظ البيانات</button>
       </form>
 
