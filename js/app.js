@@ -49,9 +49,9 @@ let routeId = 0;
 function route() {
   const myId = ++routeId;
   const isCoach = profile.role === "coach";
-  const [hashView, arg] = (location.hash.slice(1) || (isCoach ? "members" : "exercises")).split("/");
+  const [hashView, arg] = (location.hash.slice(1) || (isCoach ? "members" : "myplan")).split("/");
   let view = hashView;
-  if (["members", "results", "progress", "plan", "feedback"].includes(view) && !isCoach) view = "exercises";
+  if (["members", "results", "progress", "plan", "feedback", "exercises"].includes(view) && !isCoach) view = "myplan";
   if (["myplan", "workout"].includes(view) && isCoach) view = "members";
   if (view === "photos" && isCoach) view = "progress";
 
@@ -69,11 +69,11 @@ function route() {
   if (view === "feedback") return renderFeedback(main, ctx);
   if (view === "photos") return renderPhotos(main, ctx);
   if (view === "plan") return arg ? renderPlanBuilder(main, ctx, arg) : renderMembers(main, ctx);
+  if (view === "exercises") return renderExercises(main, ctx);
   if (!canTrain()) return drawLocked();
-  if (view === "myplan") return renderMyPlan(main, ctx);
   if (view === "workout" && arg) return renderWorkout(main, ctx, arg);
   if (view === "programs") return renderPrograms(main, ctx);
-  return renderExercises(main, ctx);
+  return isCoach ? renderMembers(main, ctx) : renderMyPlan(main, ctx);
 }
 
 // شاشة بتظهر لو الحساب مش مفعّل أو الاشتراك خلص
