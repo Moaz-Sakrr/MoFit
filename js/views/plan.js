@@ -65,15 +65,13 @@ export async function renderMyPlan(main, { profile, stale }) {
 }
 
 /* ---------- الكوتش ---------- */
-let ctxC;
-
 export async function renderPlanBuilder(main, ctx, memberId) {
-  ctxC = ctx;
   main.innerHTML = loadingView("rows");
-  await draw(main, memberId);
+  await draw(main, ctx, memberId);
 }
 
-async function draw(main, memberId) {
+// ctx بيتبعت مع كل رسم: لو اتحفظ في متغير عام، فتح خطة متدرب تاني كان بيخلي رسم الخطة الأولى يعدّي فوقها
+async function draw(main, ctx, memberId) {
   let member, plan, exercises;
   try {
     const [m, p, e] = await Promise.all([
@@ -83,12 +81,12 @@ async function draw(main, memberId) {
     ]);
     if (m.error) throw m.error; if (e.error) throw e.error;
     member = m.data; plan = p; exercises = e.data;
-  } catch (err) { if (!ctxC.stale()) main.innerHTML = `<div class="empty">ما قدرناش نجيب الخطة: ${esc(err.message)}</div>`; return; }
-  if (ctxC.stale()) return;
+  } catch (err) { if (!ctx.stale()) main.innerHTML = `<div class="empty">ما قدرناش نجيب الخطة: ${esc(err.message)}</div>`; return; }
+  if (ctx.stale()) return;
   if (!member) { main.innerHTML = `<div class="empty">المتدرب ده مش موجود. <a href="#members">رجوع للمتدربين</a></div>`; return; }
 
   const name = member.full_name || member.email;
-  const reload = () => draw(main, memberId);
+  const reload = () => draw(main, ctx, memberId);
   const head = `<div class="view-head"><div><h1>خطة ${esc(name)}</h1><p><a href="#members">← رجوع للمتدربين</a></p></div>
     ${plan ? `<button class="btn btn-tape" type="button" id="add-day">يوم جديد</button>` : ""}</div>`;
 
