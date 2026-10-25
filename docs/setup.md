@@ -80,7 +80,6 @@ js/app.js             السايد بار والتنقل بين الصفحات �
 js/youtube.js         تشغيل فيديو اليوتيوب في نافذة جوه الموقع
 js/ui.js              نوافذ التعديل والرسايل
 js/views/exercises.js التمارين حسب العضلة
-js/views/programs.js  جداول التمرين
 js/views/account.js   صفحة حسابي
 js/views/members.js   لوحة الكوتش للمتدربين
 js/views/results.js   نتايج المشتركين (الكوتش)

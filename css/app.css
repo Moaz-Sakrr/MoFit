@@ -118,17 +118,6 @@ dialog.video.vertical .video-frame{aspect-ratio:9/16;max-height:80vh}
 .video-bar button{border:1px solid rgb(255 255 255/.4);background:none;color:#fff;border-radius:6px;padding:6px 14px;cursor:pointer}
 
 /* ---------- الجداول ---------- */
-.prog-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:clamp(28px,4vw,48px)}
-.prog{display:flex;flex-direction:column;gap:14px;min-width:0;background:var(--paper-2);border-radius:8px;padding:24px}
-.prog h3{font-size:1.9rem}
-.lvl{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:.9rem;color:var(--ink-2)}
-.plate{display:inline-flex;align-items:center;gap:8px;font-weight:600;color:var(--ink)}
-.plate i{width:15px;height:15px;border-radius:50%;border:4px solid}
-.l1 i{border-color:#1f8a4c}.l2 i{border-color:#d1a000}.l3 i{border-color:#1d5fbf}
-.day h4{margin:6px 0 4px;font-size:1rem;font-weight:600}
-.sets{width:100%;border-collapse:collapse;font-size:.95rem}
-.sets td{padding:8px 0;border-bottom:1px solid var(--rule)}
-.sets td.n{text-align:left;direction:ltr;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--ink-2);padding-inline-start:12px}
 .legend{font-size:.85rem;color:var(--ink-2);margin-top:24px}
 
 /* ---------- حسابي ---------- */
@@ -273,10 +262,6 @@ textarea.tall{min-height:240px}
   .more{border:0;background:none;padding:4px 0;cursor:pointer;color:var(--ink);font:inherit;font-size:.85rem;font-weight:600;text-decoration:underline;text-underline-offset:4px;width:fit-content}
   .row-acts{gap:10px}
   .row-acts .btn{flex:1}
-  .prog-grid{gap:20px}
-  .prog{padding:20px 16px;gap:16px}
-  .prog h3{font-size:1.7rem}
-  .sets td{padding:10px 0}
   .legend{margin-top:20px}
   .account{gap:20px}
   .panel{padding:20px 16px;gap:18px}
