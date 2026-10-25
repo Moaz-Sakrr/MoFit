@@ -468,6 +468,14 @@ create policy "wlogs update" on public.set_logs for update using (member_id = au
 create policy "wlogs delete" on public.set_logs for delete using (member_id = auth.uid());
 
 -- 7.12) حدود ضد ملء المخزن وقاعدة البيانات -------------------------------------------
+-- قبل ما تطبّق القسم ده على الداتابيز الحقيقية: شغّل الاستعلام ده (قراءة بس)، ولازم كل الأعمدة تطلع 0،
+-- وإلا أوامر الـ add constraint هتفشل.
+-- select
+--   (select count(*) from public.profiles where char_length(full_name) > 100 or char_length(phone) > 30) as long_profiles,
+--   (select count(*) from public.workout_sessions where char_length(day_name) > 200) as long_session_days,
+--   (select count(*) from public.set_logs where char_length(exercise_name) > 300) as long_log_names,
+--   (select count(*) from public.workout_days where char_length(name) > 200) as long_days,
+--   (select count(*) from public.exercises where char_length(name) > 300) as long_exercises;
 -- (أ) الرفع على مخزن صور المتابعة: نفس حد الجدول (10 رفعات × 3 صور) بس على الملفات نفسها،
 -- لأن المتدرب يقدر يرفع ملفات على المخزن من غير ما يعمل صف في progress_photos
 create or replace function public.progress_files_recent()

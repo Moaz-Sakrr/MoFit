@@ -24,6 +24,9 @@ select public.tst_expect_fail($$insert into public.exercises (muscle, name) valu
 
 select public.tst_as_user('00000000-0000-0000-0000-0000000000a1');
 
+-- قبل ما نملى الحد (30): لازم الرفض يكون بسبب فولدر متدرب تاني مش بسبب الحد
+select public.tst_expect_fail($$insert into storage.objects (bucket_id, name) values ('progress-photos', '00000000-0000-0000-0000-0000000000b2/x.jpg')$$, 'cannot upload into another member folder');
+
 -- 30 ملف في الشهر مسموح (10 رفعات × 3 صور)، والـ 31 مرفوض. كل insert لوحده زي ما الموقع بيرفع ملف ملف
 do $$ begin
   for i in 1..30 loop
@@ -31,7 +34,6 @@ do $$ begin
   end loop;
 end $$;
 select public.tst_expect_fail($$insert into storage.objects (bucket_id, name) values ('progress-photos', '00000000-0000-0000-0000-0000000000a1/31.jpg')$$, '31st file in 31 days rejected');
-select public.tst_expect_fail($$insert into storage.objects (bucket_id, name) values ('progress-photos', '00000000-0000-0000-0000-0000000000b2/x.jpg')$$, 'cannot upload into another member folder');
 
 -- النصوص الطويلة مرفوضة، والعادية شغالة
 select public.tst_expect_fail($$update public.profiles set full_name = repeat('x', 101) where id = '00000000-0000-0000-0000-0000000000a1'$$, 'name over 100 rejected');
@@ -40,6 +42,7 @@ update public.profiles set full_name = 'Ahmed Ali' where id = '00000000-0000-000
 select public.tst_expect_fail($$insert into public.workout_sessions (day_name) values (repeat('x', 201))$$, 'day_name over 200 rejected');
 insert into public.workout_sessions (id, day_name) overriding system value values (900101, 'Push');
 select public.tst_expect_fail($$insert into public.set_logs (session_id, exercise_name, set_no, weight, reps) values (900101, repeat('x', 301), 1, 20, 10)$$, 'exercise_name over 300 rejected');
+insert into public.set_logs (session_id, exercise_name, set_no, weight, reps) values (900101, 'Bench', 1, 20, 10);
 
 do $$ begin raise notice 'ALL PASS'; end $$;
 rollback;

@@ -202,10 +202,10 @@ export async function showHistory(exerciseId, name) {
     <div class="foot"><button class="btn btn-ghost" type="button" id="sheet-cancel">إغلاق</button></div>`;
   form.querySelector("#sheet-cancel").onclick = () => dlg.close();
   dlg.showModal();
+  const body = form.querySelector("#hist-body");
   const { data, error } = await supabase.from("set_logs").select("*").eq("exercise_id", exerciseId)
     .order("created_at", { ascending: false }).limit(500);
-  const body = form.querySelector("#hist-body");
-  if (!dlg.open || !body) return; // النافذة اتقفلت أو اتبدلت بنافذة تانية وإحنا مستنيين
+  if (!dlg.open || !body.isConnected) return; // النافذة اتقفلت أو اتبدلت بنافذة تمرين تاني وإحنا مستنيين
   if (error) { body.innerHTML = `<div class="empty">${esc(error.message)}</div>`; return; }
   const sessions = [];
   data.forEach((l) => {
