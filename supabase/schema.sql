@@ -493,6 +493,11 @@ alter table public.workout_sessions drop constraint if exists workout_sessions_d
 alter table public.workout_sessions add constraint workout_sessions_day_name_len check (char_length(day_name) <= 200);
 alter table public.set_logs drop constraint if exists set_logs_exercise_name_len;
 alter table public.set_logs add constraint set_logs_exercise_name_len check (char_length(exercise_name) <= 300);
+-- حدود على أسماء الكوتش (اليوم والتمرين) عشان نسخة المتدرب في الجلسات والسجل ما تعدّيش حدها وتفشل
+alter table public.workout_days drop constraint if exists workout_days_name_len;
+alter table public.workout_days add constraint workout_days_name_len check (char_length(name) <= 200);
+alter table public.exercises drop constraint if exists exercises_name_len;
+alter table public.exercises add constraint exercises_name_len check (char_length(name) <= 300);
 
 -- 8) بيانات بداية (أمثلة تقدر تعدّلها أو تمسحها من لوحة الكوتش) ----------
 insert into public.exercises (muscle, name, sets, reps, cues, sort)

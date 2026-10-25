@@ -17,6 +17,11 @@ begin
   raise exception 'FAIL: % (statement succeeded but should have failed)', what;
 end $$;
 
+-- أسماء الكوتش (بتتنسخ لجلسات المتدرب) لازم تتحدد بنفس الحدود. بنختبرها كـ superuser قبل ما نبدّل الدور
+insert into public.workout_plans (id, member_id, name) overriding system value values (900101, '00000000-0000-0000-0000-0000000000a1', 'plan A');
+select public.tst_expect_fail($$insert into public.workout_days (plan_id, name) values (900101, repeat('x', 201))$$, 'day name over 200 rejected');
+select public.tst_expect_fail($$insert into public.exercises (muscle, name) values ('chest', repeat('x', 301))$$, 'exercise name over 300 rejected');
+
 select public.tst_as_user('00000000-0000-0000-0000-0000000000a1');
 
 -- 30 ملف في الشهر مسموح (10 رفعات × 3 صور)، والـ 31 مرفوض. كل insert لوحده زي ما الموقع بيرفع ملف ملف
