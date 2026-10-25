@@ -43,6 +43,10 @@ export function openVideo(url, title) {
   mark.setAttribute("aria-hidden", "true");
   frame.replaceChildren(f, mark);
   dlg.showModal();
+  // فيديو بالطول بلينك عادي (مش /shorts/): oardefault صورة بمقاس الفيديو الأصلي، ولو الفيديو بالعرض بترجع صورة صغيرة بالعرض
+  const img = new Image();
+  img.onload = () => { if (frame.contains(f)) dlg.classList.toggle("vertical", img.naturalHeight > img.naturalWidth); };
+  img.src = `https://i.ytimg.com/vi/${id}/oardefault.jpg`;
   supabase.auth.getSession().then(({ data: { session } }) => {
     mark.textContent = `${session?.user?.email || ""} · ${today()}`;
   });
