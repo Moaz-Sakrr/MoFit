@@ -47,7 +47,7 @@ function draw(main, isCoach) {
   }).join("");
 
   main.innerHTML = `
-    <div class="view-head"><div><h1>التمارين</h1><p>اختار العضلة، واضغط على الصورة عشان تشوف فيديو طريقة الأداء. الأرقام هي المجموعات × العدات.</p></div>
+    <div class="view-head"><div><h1>مكتبة التمارين</h1><p>ضيف التمارين بفيديو اليوتيوب بتاعها، وبعدين اختار منها وانت بتعمل خطة كل متدرب. المتدربين مش بيشوفوا الصفحة دي.</p></div>
       ${isCoach ? `<button class="btn btn-tape" type="button" id="add-ex">إضافة تمرين</button>` : ""}</div>
     <div class="index" role="tablist">${tabs}</div>
     ${shown.length ? `<ul class="rows">${rows}</ul>` : `<div class="empty gap-top">مفيش تمارين للعضلة دي لسه.</div>`}`;

@@ -1,6 +1,6 @@
 // Service worker بسيط: بيخلّي الموقع يتثبّت كتطبيق، ومش بيخزّن حاجة قديمة.
 // بنجيب من النت الأول دايماً، ولو مفيش نت بنرجع لآخر نسخة اتفتحت. طلبات Supabase والفيديو مش بتعدّي عليه.
-const CACHE = "mofit-v4";
+const CACHE = "mofit-v5";
 
 self.addEventListener("install", () => self.skipWaiting());
 
