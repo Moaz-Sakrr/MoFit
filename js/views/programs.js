@@ -3,9 +3,11 @@ import { supabase, esc } from "../supabase.js";
 import { toast, openSheet, confirmSheet, loadingView } from "../ui.js";
 
 const LEVELS = { 1: "مبتدئ", 2: "متوسط", 3: "متقدم" };
+let isStale = () => false; // من ctx الصفحة الحالية، عشان أي حفظ بيخلص بعد ما المستخدم يمشي ما يرسمش فوق الصفحة الجديدة
 let list = [];
 
 export async function renderPrograms(main, { isCoach, stale }) {
+  isStale = stale;
   main.innerHTML = `${loadingView("cards")}`;
   const { data, error } = await supabase.from("programs").select("*").order("sort").order("id");
   if (stale()) return;
@@ -18,6 +20,7 @@ export async function renderPrograms(main, { isCoach, stale }) {
 const rest = (r) => { const n = +r; if (!r) return ""; if (isNaN(n)) return r; return n >= 60 && n % 30 === 0 ? `${n / 60}m` : `${n}s`; };
 
 function draw(main, isCoach) {
+  if (isStale()) return;
   const cards = list.map((p) => `<article class="prog">
     <div class="lvl"><span class="plate l${p.level}"><i></i>${LEVELS[p.level] || ""}</span>${p.weeks ? `<span>${esc(p.weeks)} أسابيع</span>` : ""}${p.per_week ? `<span>${esc(p.per_week)} أيام في الأسبوع</span>` : ""}</div>
     <h3>${esc(p.name)}</h3>

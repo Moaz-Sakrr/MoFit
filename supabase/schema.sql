@@ -467,6 +467,46 @@ create policy "wlogs insert" on public.set_logs for insert with check (member_id
 create policy "wlogs update" on public.set_logs for update using (member_id = auth.uid()) with check (member_id = auth.uid() and public.owns_session(session_id));
 create policy "wlogs delete" on public.set_logs for delete using (member_id = auth.uid());
 
+-- 7.12) حدود ضد ملء المخزن وقاعدة البيانات -------------------------------------------
+-- قبل ما تطبّق القسم ده على الداتابيز الحقيقية: شغّل الاستعلام ده (قراءة بس)، ولازم كل الأعمدة تطلع 0،
+-- وإلا أوامر الـ add constraint هتفشل.
+-- select
+--   (select count(*) from public.profiles where char_length(full_name) > 100 or char_length(phone) > 30) as long_profiles,
+--   (select count(*) from public.workout_sessions where char_length(day_name) > 200) as long_session_days,
+--   (select count(*) from public.set_logs where char_length(exercise_name) > 300) as long_log_names,
+--   (select count(*) from public.workout_days where char_length(name) > 200) as long_days,
+--   (select count(*) from public.exercises where char_length(name) > 300) as long_exercises;
+-- (أ) الرفع على مخزن صور المتابعة: نفس حد الجدول (10 رفعات × 3 صور) بس على الملفات نفسها،
+-- لأن المتدرب يقدر يرفع ملفات على المخزن من غير ما يعمل صف في progress_photos
+create or replace function public.progress_files_recent()
+returns int language sql stable security definer set search_path = public, storage as $$
+  select count(*)::int from storage.objects
+  where bucket_id = 'progress-photos'
+    and (storage.foldername(name))[1] = auth.uid()::text
+    and created_at > now() - interval '31 days';
+$$;
+revoke all on function public.progress_files_recent() from public, anon;
+grant execute on function public.progress_files_recent() to authenticated;
+
+-- بتستبدل سياسة الرفع اللي في 7.7 وبتزوّد عليها حد الملفات
+drop policy if exists "progress files insert" on storage.objects;
+create policy "progress files insert" on storage.objects for insert
+  with check (bucket_id = 'progress-photos' and (storage.foldername(name))[1] = auth.uid()::text
+              and public.is_active_member() and public.progress_files_recent() < 30);
+
+-- (ب) أطوال النصوص اللي المتدرب بيكتبها
+alter table public.profiles drop constraint if exists profiles_text_len;
+alter table public.profiles add constraint profiles_text_len check (char_length(full_name) <= 100 and char_length(phone) <= 30);
+alter table public.workout_sessions drop constraint if exists workout_sessions_day_name_len;
+alter table public.workout_sessions add constraint workout_sessions_day_name_len check (char_length(day_name) <= 200);
+alter table public.set_logs drop constraint if exists set_logs_exercise_name_len;
+alter table public.set_logs add constraint set_logs_exercise_name_len check (char_length(exercise_name) <= 300);
+-- حدود على أسماء الكوتش (اليوم والتمرين) عشان نسخة المتدرب في الجلسات والسجل ما تعدّيش حدها وتفشل
+alter table public.workout_days drop constraint if exists workout_days_name_len;
+alter table public.workout_days add constraint workout_days_name_len check (char_length(name) <= 200);
+alter table public.exercises drop constraint if exists exercises_name_len;
+alter table public.exercises add constraint exercises_name_len check (char_length(name) <= 300);
+
 -- 8) بيانات بداية (أمثلة تقدر تعدّلها أو تمسحها من لوحة الكوتش) ----------
 insert into public.exercises (muscle, name, sets, reps, cues, sort)
 select * from (values
