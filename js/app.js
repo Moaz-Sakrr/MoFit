@@ -11,6 +11,7 @@ import { renderProgress } from "./views/progress.js";
 import { renderFeedback } from "./views/feedback.js";
 import { renderMyPlan, renderPlanBuilder } from "./views/plan.js";
 import { renderWorkout } from "./views/workout.js";
+import { renderMeals } from "./views/meals.js";
 import { disablePush } from "./push.js";
 
 const $ = (id) => document.getElementById(id);
@@ -71,6 +72,7 @@ function route() {
   if (view === "plan") return arg ? renderPlanBuilder(main, ctx, arg) : renderMembers(main, ctx);
   if (view === "exercises") return renderExercises(main, ctx);
   if (!canTrain()) return drawLocked();
+  if (view === "meals") return renderMeals(main, ctx);
   if (view === "workout" && arg) return renderWorkout(main, ctx, arg);
   return isCoach ? renderMembers(main, ctx) : renderMyPlan(main, ctx);
 }

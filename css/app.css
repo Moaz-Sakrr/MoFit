@@ -482,3 +482,26 @@ dialog[open]::backdrop{animation:fade .2s ease-out}
   .xcard-dose b{font-size:1.25rem}
   .xcard-acts .btn{flex:1;min-height:46px;font-size:1rem}
 }
+
+/* ---------- الوجبات: الفيديو فوق (نفس .thumb بتاع التمارين) وتحته السعرات والوصف والمكونات ---------- */
+.meal-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:24px}
+.meal{background:var(--paper-2);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.meal .thumb{background:var(--paper)}
+.meal-body{display:flex;flex-direction:column;gap:8px;min-width:0;padding-inline:4px}
+.meal h3{font-size:1.45rem}
+.meal .dose{background:var(--paper)}
+.meal-desc{color:var(--ink-2);font-size:.95rem;white-space:pre-wrap;overflow-wrap:anywhere}
+.meal-h{font-size:.95rem;font-weight:600;margin:6px 0 0}
+.meal-ing{margin:0;padding-inline-start:20px;display:flex;flex-direction:column;gap:2px;font-size:.95rem;overflow-wrap:anywhere}
+.meal-ing li::marker{color:var(--tape)}
+.meal .row-acts{margin-top:auto;padding-inline:4px}
+@media (max-width:640px){
+  .meal-grid{gap:18px}
+  .meal h3{font-size:1.3rem}
+  .meal .row-acts .btn{flex:1}
+}
+.meal-cat{font-size:.78rem;font-weight:600;background:var(--tape);color:var(--tape-ink);padding:1px 10px;border-radius:999px;width:fit-content}
+.meal-ing:not(.open) li:nth-child(n+3){display:none}
+.ing-more{display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:4px 0;cursor:pointer;color:var(--ink);font:inherit;font-size:.88rem;font-weight:600;width:fit-content}
+.ing-more svg{width:16px;height:16px;color:var(--tape);transition:transform .2s}
+.ing-more[aria-expanded="true"] svg{transform:rotate(180deg)}

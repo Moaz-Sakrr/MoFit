@@ -507,6 +507,30 @@ alter table public.workout_days add constraint workout_days_name_len check (char
 alter table public.exercises drop constraint if exists exercises_name_len;
 alter table public.exercises add constraint exercises_name_len check (char_length(name) <= 300);
 
+-- 7.13) الوجبات -------------------------------------------------------------------
+-- الكوتش يضيف وجبات بفيديو يوتيوب وتصنيف (فطار/غدا/عشا/سناك) وعدد السعرات والوصف والمكونات (كل مكون في سطر).
+-- المتدرب المفعّل والكوتش بس يشوفوها، زي التمارين بالظبط. الكتابة للكوتش بس
+create table if not exists public.meals (
+  id          bigint generated always as identity primary key,
+  name        text not null check (char_length(btrim(name)) between 1 and 200),
+  category    text not null default 'lunch',
+  calories    int  check (calories between 0 and 10000),
+  description text not null default '' check (char_length(description) <= 1000),
+  ingredients text not null default '' check (char_length(ingredients) <= 3000),
+  youtube_url text not null default '' check (char_length(youtube_url) <= 300),
+  sort        int  not null default 0,
+  created_at  timestamptz not null default now()
+);
+-- لو القسم ده اتشغّل على مشروع تجريبي قبل ما التصنيف يتضاف
+alter table public.meals add column if not exists category text not null default 'lunch';
+alter table public.meals drop constraint if exists meals_category_check;
+alter table public.meals add constraint meals_category_check check (category in ('breakfast','lunch','dinner','snack'));
+alter table public.meals enable row level security;
+drop policy if exists "meals read"  on public.meals;
+drop policy if exists "meals write" on public.meals;
+create policy "meals read"  on public.meals for select using (public.is_coach() or public.is_active_member());
+create policy "meals write" on public.meals for all    using (public.is_coach()) with check (public.is_coach());
+
 -- 7.13) تذكير بموعد التمرين (Web Push) ---------------------------------------
 -- المتدرب يختار أيامه وساعة التذكير. الـ Edge Function send-reminders بتتنادى من pg_cron كل 15 دقيقة
 -- وبتقرا الجدولين بـ service_role. last_sent_on بتكتبه الـ function بس (عشان ما يتبعتش مرتين في اليوم).
