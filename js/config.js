@@ -11,3 +11,7 @@ export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 export const TURNSTILE_SITE_KEY = "0x4AAAAAAFR4j4OcrKxs0eI2";
 
 export const COACH_WHATSAPP = "201032567894";
+
+// مفتاح VAPID العام بتاع إشعارات التذكير — عام وآمن. المفتاح السري في secrets الـ Edge Function بس
+// سيبه فاضي لحد ما المفاتيح تتعمل للمشروع الحقيقي (قسم التذكير هيقول إن الإشعارات مش مدعومة)
+export const VAPID_PUBLIC_KEY = "";

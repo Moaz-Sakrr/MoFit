@@ -11,6 +11,7 @@ import { renderProgress } from "./views/progress.js";
 import { renderFeedback } from "./views/feedback.js";
 import { renderMyPlan, renderPlanBuilder } from "./views/plan.js";
 import { renderWorkout } from "./views/workout.js";
+import { disablePush } from "./push.js";
 
 const $ = (id) => document.getElementById(id);
 const main = $("main");
@@ -99,6 +100,7 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMenu(
 
 $("logout").onclick = async (e) => {
   e.preventDefault();
+  await disablePush(); // قبل signOut عشان الـ RLS يسمح بمسح الصف
   await supabase.auth.signOut();
   location.replace("login.html");
 };
