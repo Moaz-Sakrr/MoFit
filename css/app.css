@@ -322,6 +322,12 @@ textarea.tall{min-height:240px}
 .stars:has(label:hover) label:hover,.stars:has(label:hover) label:has(~ label:hover){color:var(--tape)}
 .stars label:hover{transform:scale(1.12)}
 .stars input:focus-visible + label{outline:3px solid var(--tape);outline-offset:2px;border-radius:4px}
+.days{border:0;margin:0 0 12px;padding:0;display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.days legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:4px;width:100%}
+.days label{padding:6px 12px;border-radius:999px;border:1px solid var(--rule);background:var(--paper-2);cursor:pointer;font-size:.92rem;user-select:none}
+.days input:checked + label{background:var(--tape);border-color:var(--tape);color:var(--tape-ink);font-weight:700}
+.days input:focus-visible + label{outline:3px solid var(--tape);outline-offset:2px}
+#push-box{margin-top:14px}
 .fb-stars{color:var(--tape);letter-spacing:1px;font-size:1.05rem;white-space:nowrap}
 .fb-stars i{font-style:normal;color:color-mix(in srgb,var(--ink) 22%,transparent)}
 .fb-h{font-size:1.25rem;margin-top:8px}
