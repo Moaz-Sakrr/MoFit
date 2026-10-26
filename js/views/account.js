@@ -218,6 +218,11 @@ export function renderAccount(main, ctx) {
         <div class="field"><label for="a-pass">كلمة السر الجديدة</label><input id="a-pass" type="password" dir="ltr" minlength="6" autocomplete="new-password" required></div>
         <button class="btn btn-ink" type="submit">تغيير كلمة السر</button>
       </form>
+
+      <section class="panel acct-links">
+        <a class="btn btn-ghost" href="index.html">الصفحة الرئيسية</a>
+        <a class="btn btn-ghost logout" href="#">تسجيل خروج</a>
+      </section>
     </div>`;
 
   drawInstall(main.querySelector("#install"));
