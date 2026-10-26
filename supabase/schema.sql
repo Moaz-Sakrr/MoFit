@@ -531,7 +531,7 @@ drop policy if exists "meals write" on public.meals;
 create policy "meals read"  on public.meals for select using (public.is_coach() or public.is_active_member());
 create policy "meals write" on public.meals for all    using (public.is_coach()) with check (public.is_coach());
 
--- 7.13) تذكير بموعد التمرين (Web Push) ---------------------------------------
+-- 7.14) تذكير بموعد التمرين (Web Push) ---------------------------------------
 -- المتدرب يختار أيامه وساعة التذكير. الـ Edge Function send-reminders بتتنادى من pg_cron كل 15 دقيقة
 -- وبتقرا الجدولين بـ service_role. last_sent_on بتكتبه الـ function بس (عشان ما يتبعتش مرتين في اليوم).
 create table if not exists public.training_reminders (

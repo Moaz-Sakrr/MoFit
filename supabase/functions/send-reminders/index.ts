@@ -1,4 +1,4 @@
-// بتتنادى من pg_cron كل 15 دقيقة (schema.sql 7.13). بتبعت إشعار لكل متدرب ميعاده الربع ساعة دي.
+// بتتنادى من pg_cron كل 15 دقيقة (schema.sql 7.14). بتبعت إشعار لكل متدرب ميعاده الربع ساعة دي.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import webpush from "npm:web-push@3.6.7";
 import { cairoSlot } from "./slot.js";

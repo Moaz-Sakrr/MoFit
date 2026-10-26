@@ -150,7 +150,7 @@ images/               صور الكوتش والمتدربين
 
 الترتيب مهم: لو فعّلت الحماية في Supabase قبل ما ترفع الموقع بالمفتاح، الدخول والتسجيل هيقفوا.
 
-## إشعارات تذكير التمرين (قسم 7.13)
+## إشعارات تذكير التمرين (قسم 7.14)
 
 المتدرب بيختار أيامه وساعة التذكير من «حسابي»، و`pg_cron` كل ربع ساعة بينادي Edge Function اسمها `send-reminders` تبعت Web Push للي ميعادهم جه (بتوقيت القاهرة). بتتعمل مرة واحدة بعد دمج الـ PR، وشخص واحد بس يعملها:
 
@@ -165,7 +165,7 @@ images/               صور الكوتش والمتدربين
    select vault.create_secret('<REMINDERS_SECRET>', 'reminders_secret');
    select vault.create_secret('https://<project-ref>.supabase.co', 'project_url');
    ```
-8. شغّل قسم `7.13` من `schema.sql`، واتأكد إن `select jobname from cron.job;` بيرجّع `send-reminders` و`cleanup-cron-log`.
+8. شغّل قسم `7.14` من `schema.sql`، واتأكد إن `select jobname from cron.job;` بيرجّع `send-reminders` و`cleanup-cron-log`.
 9. بعد أول ربع ساعة: `select status_code, content from net._http_response order by created desc limit 1;` لازم يرجّع `200` و`{"sent":...}`. لو رجّع `VAPID config: ...` يبقى فيه secret من بتوع VAPID ناقص أو غلط.
 
 ملاحظات: على الآيفون الإشعارات بتشتغل بس لو الموقع متثبّت على الشاشة الرئيسية (iOS 16.4 أو أحدث). والمتدرب بياخد تذكير واحد بس في اليوم، ولو الـ cron فوّت ربع ساعة التذكير بتاعها ما بيتبعتش متأخر.
