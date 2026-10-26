@@ -531,6 +531,63 @@ drop policy if exists "meals write" on public.meals;
 create policy "meals read"  on public.meals for select using (public.is_coach() or public.is_active_member());
 create policy "meals write" on public.meals for all    using (public.is_coach()) with check (public.is_coach());
 
+-- 7.14) تذكير بموعد التمرين (Web Push) ---------------------------------------
+-- المتدرب يختار أيامه وساعة التذكير. الـ Edge Function send-reminders بتتنادى من pg_cron كل 15 دقيقة
+-- وبتقرا الجدولين بـ service_role. last_sent_on بتكتبه الـ function بس (عشان ما يتبعتش مرتين في اليوم).
+create table if not exists public.training_reminders (
+  member_id    uuid primary key default auth.uid() references public.profiles(id) on delete cascade,
+  days         smallint[] not null default '{}' check (days <@ array[0,1,2,3,4,5,6]::smallint[]),
+  remind_at    time not null check (extract(minute from remind_at)::int % 15 = 0 and extract(second from remind_at) = 0),
+  enabled      boolean not null default true,
+  last_sent_on date
+);
+create table if not exists public.push_subscriptions (
+  id         bigint generated always as identity primary key,
+  member_id  uuid not null default auth.uid() references public.profiles(id) on delete cascade,
+  endpoint   text not null unique check (char_length(endpoint) <= 1000),
+  p256dh     text not null check (char_length(p256dh) <= 200),
+  auth       text not null check (char_length(auth) <= 100),
+  created_at timestamptz not null default now()
+);
+create index if not exists push_subscriptions_member_idx on public.push_subscriptions (member_id);
+alter table public.training_reminders enable row level security;
+alter table public.push_subscriptions enable row level security;
+
+-- المتدرب ما يقدرش يكتب last_sent_on: الكتابة على الأعمدة دي بس
+-- (member_id في الـ update لأن upsert بتاع PostgREST بيعمل set لكل أعمدة الطلب، والسياسة بتمنع تغييره لحد تاني)
+revoke insert, update on public.training_reminders from anon, authenticated;
+grant insert (member_id, days, remind_at, enabled), update (member_id, days, remind_at, enabled) on public.training_reminders to authenticated;
+
+drop policy if exists "reminders read"   on public.training_reminders;
+drop policy if exists "reminders insert" on public.training_reminders;
+drop policy if exists "reminders update" on public.training_reminders;
+drop policy if exists "reminders delete" on public.training_reminders;
+create policy "reminders read"   on public.training_reminders for select using (member_id = auth.uid() or public.is_coach());
+create policy "reminders insert" on public.training_reminders for insert with check (member_id = auth.uid());
+create policy "reminders update" on public.training_reminders for update using (member_id = auth.uid()) with check (member_id = auth.uid());
+create policy "reminders delete" on public.training_reminders for delete using (member_id = auth.uid());
+
+drop policy if exists "push subs read"   on public.push_subscriptions;
+drop policy if exists "push subs insert" on public.push_subscriptions;
+drop policy if exists "push subs delete" on public.push_subscriptions;
+create policy "push subs read"   on public.push_subscriptions for select using (member_id = auth.uid());
+create policy "push subs insert" on public.push_subscriptions for insert with check (member_id = auth.uid());
+create policy "push subs delete" on public.push_subscriptions for delete using (member_id = auth.uid());
+
+-- الجدولة: لازم pg_cron و pg_net يكونوا متفعّلين (Dashboard ← Integrations ← Cron)
+-- قبل أول تشغيل حط السرّين في Vault مرة واحدة (مش هنا):
+--   select vault.create_secret('<نفس REMINDERS_SECRET اللي في الـ function>', 'reminders_secret');
+--   select vault.create_secret('https://<project-ref>.supabase.co', 'project_url');
+create extension if not exists pg_cron;
+create extension if not exists pg_net;
+select cron.schedule('send-reminders', '*/15 * * * *', $$
+  select net.http_post(
+    url     := (select decrypted_secret from vault.decrypted_secrets where name = 'project_url') || '/functions/v1/send-reminders',
+    headers := jsonb_build_object('Authorization', 'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'reminders_secret'))
+  ) $$);
+-- سجل تشغيل الـ cron بيكبر لوحده، فبنمسح الأقدم من أسبوع
+select cron.schedule('cleanup-cron-log', '0 3 * * *', $$ delete from cron.job_run_details where end_time < now() - interval '7 days' $$);
+
 -- 8) بيانات بداية (أمثلة تقدر تعدّلها أو تمسحها من لوحة الكوتش) ----------
 insert into public.exercises (muscle, name, sets, reps, cues, sort)
 select * from (values

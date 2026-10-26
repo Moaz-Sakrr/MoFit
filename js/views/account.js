@@ -4,9 +4,14 @@ import { toast, confirmSheet } from "../ui.js";
 import { memberStatus } from "./members.js";
 import { isInstalled, isIOS, canPrompt, promptInstall } from "../pwa.js";
 import { stars } from "./feedback.js";
+import { pushState, enablePush, disablePush } from "../push.js";
 
 const LABEL = { active: "مفعّل", soon: "بيخلص قريب", expired: "منتهي", inactive: "مش مفعّل لسه", coach: "الكوتش" };
 const fmt = (d) => d ? new Date(d).toLocaleDateString("ar-EG", { day: "numeric", month: "long", year: "numeric" }) : "مفيش تاريخ";
+// ترتيب الأسبوع في مصر، والأرقام زي extract(dow) في Postgres (0 = الأحد)
+const DAYS = [[6, "السبت"], [0, "الأحد"], [1, "الاتنين"], [2, "التلات"], [3, "الأربع"], [4, "الخميس"], [5, "الجمعة"]];
+const SLOTS = Array.from({ length: 96 }, (_, i) => `${String(Math.floor(i / 4)).padStart(2, "0")}:${String((i % 4) * 15).padStart(2, "0")}`);
+const slotLabel = (t) => new Date(`2000-01-01T${t}`).toLocaleTimeString("ar-EG", { hour: "numeric", minute: "2-digit" });
 
 // كارت تثبيت الموقع كتطبيق: زر على أندرويد، وخطوات على آيفون، وتلميح للباقي
 function drawInstall(box) {
@@ -126,6 +131,63 @@ function drawList(box, ctx) {
   }));
 }
 
+// ---------- تذكير التمرين: الأيام والساعة، وتفعيل الإشعارات على الجهاز ده ----------
+const PUSH_MSG = {
+  unsupported: `<p class="notice bad">المتصفح ده مش بيدعم الإشعارات.</p>`,
+  "needs-install": `<p class="notice">على الآيفون لازم تثبّت MoFit على الشاشة الرئيسية الأول (الخطوات في كارت التثبيت)، وتفتحه من الأيقونة.</p>`,
+  denied: `<p class="notice bad">الإشعارات مقفولة للموقع ده من إعدادات المتصفح. افتحها من هناك وارجع هنا.</p>`,
+  on: `<p class="notice ok">الإشعارات شغالة على الجهاز ده.</p><button class="btn btn-ghost btn-sm" type="button" id="push-off">وقّف الإشعارات على الجهاز ده</button>`,
+  off: `<button class="btn btn-tape" type="button" id="push-on">فعّل الإشعارات على الجهاز ده</button>`,
+};
+
+async function drawPush(wrap, ctx) {
+  const st = await pushState();
+  if (ctx.stale() || !wrap.isConnected) return;
+  wrap.innerHTML = PUSH_MSG[st];
+  wrap.querySelector("#push-on")?.addEventListener("click", async (e) => {
+    e.target.disabled = true;
+    try { await enablePush(); toast("تمام، هيوصلك التذكير في ميعاده"); }
+    catch (err) { toast(err.message, true); }
+    drawPush(wrap, ctx);
+  });
+  wrap.querySelector("#push-off")?.addEventListener("click", async () => {
+    await disablePush(); toast("الإشعارات اتوقفت على الجهاز ده"); drawPush(wrap, ctx);
+  });
+}
+
+async function drawReminder(box, ctx) {
+  box.innerHTML = `<h2>تذكير التمرين</h2><div class="sk sk-block"></div>`;
+  const { data, error } = await supabase.from("training_reminders").select("days, remind_at, enabled").eq("member_id", ctx.profile.id).maybeSingle();
+  if (ctx.stale() || !box.isConnected) return;
+  if (error) { box.innerHTML = `<h2>تذكير التمرين</h2><p class="notice bad">ما قدرناش نجيب التذكير: ${esc(error.message)}</p>`; return; }
+  const r = data || { days: [], remind_at: "18:00:00", enabled: true };
+  const at = r.remind_at.slice(0, 5);
+  box.innerHTML = `<h2>تذكير التمرين</h2>
+    <p class="fb-sub">اختار أيام تمرينك والساعة، وهيوصلك إشعار على موبايلك في الميعاد.</p>
+    <form id="f-rem">
+      <fieldset class="days"><legend>أيام التمرين</legend>
+        ${DAYS.map(([n, name]) => `<input class="sr-only" type="checkbox" id="rd-${n}" value="${n}"${r.days.includes(n) ? " checked" : ""}><label for="rd-${n}">${name}</label>`).join("")}
+      </fieldset>
+      <div class="field"><label for="r-at">ساعة التذكير</label>
+        <select id="r-at">${SLOTS.map((t) => `<option value="${t}"${t === at ? " selected" : ""}>${slotLabel(t)}</option>`).join("")}</select></div>
+      <div class="field check"><label for="r-on"><input id="r-on" type="checkbox"${r.enabled ? " checked" : ""}><span>التذكير شغال</span></label></div>
+      <button class="btn btn-ink" type="submit">حفظ التذكير</button>
+    </form>
+    <div id="push-box"></div>`;
+  drawPush(box.querySelector("#push-box"), ctx);
+  box.querySelector("#f-rem").onsubmit = async (e) => {
+    e.preventDefault();
+    const days = [...box.querySelectorAll(".days input:checked")].map((c) => +c.value);
+    if (!days.length) return toast("اختار يوم واحد على الأقل", true);
+    const btn = e.submitter; btn.disabled = true;
+    const { error } = await supabase.from("training_reminders")
+      .upsert({ member_id: ctx.profile.id, days, remind_at: box.querySelector("#r-at").value, enabled: box.querySelector("#r-on").checked });
+    btn.disabled = false;
+    if (error) return toast("ما اتحفظش: " + error.message, true);
+    toast("التذكير اتحفظ");
+  };
+}
+
 export function renderAccount(main, ctx) {
   const { profile, onProfileChange } = ctx;
   const st = memberStatus(profile);
@@ -142,6 +204,7 @@ export function renderAccount(main, ctx) {
       <section class="panel" id="install" hidden></section>
 
       ${profile.role !== "coach" ? `<section class="panel fb" id="feedback"></section>` : ""}
+      ${profile.role !== "coach" ? `<section class="panel" id="reminder"></section>` : ""}
 
       <form class="panel" id="f-profile">
         <h2>بياناتي</h2>
@@ -160,6 +223,8 @@ export function renderAccount(main, ctx) {
   drawInstall(main.querySelector("#install"));
   const fb = main.querySelector("#feedback");
   if (fb) drawFeedback(fb, ctx);
+  const rem = main.querySelector("#reminder");
+  if (rem) drawReminder(rem, ctx);
 
   main.querySelector("#f-profile").onsubmit = async (e) => {
     e.preventDefault();
