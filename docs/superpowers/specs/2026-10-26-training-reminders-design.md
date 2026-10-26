@@ -26,7 +26,7 @@ send-reminders ──service_role──► يقرا الجدولين + profiles
                ──web-push (VAPID)──► سيرفر الـ push (Google / Apple / Mozilla) ──► sw.js ──► إشعار
 ```
 
-## قاعدة البيانات: قسم `-- 7.12` في `supabase/schema.sql` (قبل `-- 8)`)
+## قاعدة البيانات: قسم `-- 7.13` في `supabase/schema.sql` (قبل `-- 8)`)
 كله idempotent (`if not exists` / `drop policy if exists`) زي باقي الملف.
 
 ### `training_reminders`
@@ -132,7 +132,7 @@ Secrets الـ function: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT
 - **مشروع متوقف (paused) = تذكيرات واقفة:** المتدربين بيفتحوا الموقع يومياً، فده مش متوقع يحصل.
 
 ## التطبيق على الحقيقي (بعد الدمج، شخص واحد)
-1. نشغّل قسم `7.12` من `schema.sql`. لازم الأول نتأكد إن `pg_cron` و`pg_net` بيتفعّلوا على الخطة.
+1. نشغّل قسم `7.13` من `schema.sql`. لازم الأول نتأكد إن `pg_cron` و`pg_net` بيتفعّلوا على الخطة.
 2. نعمل مفاتيح VAPID (`npx web-push generate-vapid-keys`). العام يتحط في `config.js`، والسري يتحط في secrets الـ function.
 3. نعمل `REMINDERS_SECRET` عشوائي، ونحطه في secrets الـ function وفي Vault باسم `reminders_secret`.
 4. `supabase functions deploy send-reminders --no-verify-jwt`. الحماية هنا بالسر بتاعنا، مش بـ JWT.

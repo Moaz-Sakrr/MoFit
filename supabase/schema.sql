@@ -507,6 +507,49 @@ alter table public.workout_days add constraint workout_days_name_len check (char
 alter table public.exercises drop constraint if exists exercises_name_len;
 alter table public.exercises add constraint exercises_name_len check (char_length(name) <= 300);
 
+-- 7.13) تذكير بموعد التمرين (Web Push) ---------------------------------------
+-- المتدرب يختار أيامه وساعة التذكير. الـ Edge Function send-reminders بتتنادى من pg_cron كل 15 دقيقة
+-- وبتقرا الجدولين بـ service_role. last_sent_on بتكتبه الـ function بس (عشان ما يتبعتش مرتين في اليوم).
+create table if not exists public.training_reminders (
+  member_id    uuid primary key default auth.uid() references public.profiles(id) on delete cascade,
+  days         smallint[] not null default '{}' check (days <@ array[0,1,2,3,4,5,6]::smallint[]),
+  remind_at    time not null check (extract(minute from remind_at)::int % 15 = 0 and extract(second from remind_at) = 0),
+  enabled      boolean not null default true,
+  last_sent_on date
+);
+create table if not exists public.push_subscriptions (
+  id         bigint generated always as identity primary key,
+  member_id  uuid not null default auth.uid() references public.profiles(id) on delete cascade,
+  endpoint   text not null unique check (char_length(endpoint) <= 1000),
+  p256dh     text not null check (char_length(p256dh) <= 200),
+  auth       text not null check (char_length(auth) <= 100),
+  created_at timestamptz not null default now()
+);
+create index if not exists push_subscriptions_member_idx on public.push_subscriptions (member_id);
+alter table public.training_reminders enable row level security;
+alter table public.push_subscriptions enable row level security;
+
+-- المتدرب ما يقدرش يكتب last_sent_on: الكتابة على الأعمدة دي بس
+-- (member_id في الـ update لأن upsert بتاع PostgREST بيعمل set لكل أعمدة الطلب، والسياسة بتمنع تغييره لحد تاني)
+revoke insert, update on public.training_reminders from anon, authenticated;
+grant insert (member_id, days, remind_at, enabled), update (member_id, days, remind_at, enabled) on public.training_reminders to authenticated;
+
+drop policy if exists "reminders read"   on public.training_reminders;
+drop policy if exists "reminders insert" on public.training_reminders;
+drop policy if exists "reminders update" on public.training_reminders;
+drop policy if exists "reminders delete" on public.training_reminders;
+create policy "reminders read"   on public.training_reminders for select using (member_id = auth.uid() or public.is_coach());
+create policy "reminders insert" on public.training_reminders for insert with check (member_id = auth.uid());
+create policy "reminders update" on public.training_reminders for update using (member_id = auth.uid()) with check (member_id = auth.uid());
+create policy "reminders delete" on public.training_reminders for delete using (member_id = auth.uid());
+
+drop policy if exists "push subs read"   on public.push_subscriptions;
+drop policy if exists "push subs insert" on public.push_subscriptions;
+drop policy if exists "push subs delete" on public.push_subscriptions;
+create policy "push subs read"   on public.push_subscriptions for select using (member_id = auth.uid());
+create policy "push subs insert" on public.push_subscriptions for insert with check (member_id = auth.uid());
+create policy "push subs delete" on public.push_subscriptions for delete using (member_id = auth.uid());
+
 -- 8) بيانات بداية (أمثلة تقدر تعدّلها أو تمسحها من لوحة الكوتش) ----------
 insert into public.exercises (muscle, name, sets, reps, cues, sort)
 select * from (values
