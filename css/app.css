@@ -52,15 +52,57 @@
 .side-nav a[aria-current="page"]{color:var(--night-ink);background:var(--night-2);box-shadow:inset -4px 0 0 var(--tape)}
 .side-foot{margin-top:auto;display:flex;flex-direction:column;gap:2px}
 .topbar{display:none}
-.scrim{display:none}
+.nav-ind,.more-btn,.panel.acct-links{display:none}
+dialog.more-menu{border:0;padding:0;background:var(--night);color:var(--night-ink);border-radius:16px;width:min(360px,92vw)}
+dialog.more-menu::backdrop{background:rgb(0 0 0/.5)}
+dialog.more-menu .side-nav{padding:12px}
+/* «المزيد» بتطلع من ناحية الزرار، والخانات بتدخل ورا بعض */
+dialog.more-menu[open]{transform-origin:left bottom;animation:menu-in .38s cubic-bezier(.2,1.1,.3,1)}
+dialog.more-menu[open] a{animation:menu-item .32s cubic-bezier(.2,.8,.3,1) backwards}
+dialog.more-menu[open] a:nth-child(2){animation-delay:.04s}
+dialog.more-menu[open] a:nth-child(3){animation-delay:.08s}
+dialog.more-menu[open] a:nth-child(4){animation-delay:.12s}
+dialog.more-menu[open] a:nth-child(5){animation-delay:.16s}
+dialog.more-menu[open].closing{animation:menu-out .18s ease-in forwards}
+dialog.more-menu[open].closing::backdrop{animation:fade .18s ease-in reverse forwards}
+@keyframes menu-in{from{opacity:0;transform:translateY(16px) scale(.85)}}
+@keyframes menu-out{to{opacity:0;transform:translateY(12px) scale(.92)}}
+@keyframes menu-item{from{opacity:0;transform:translateX(14px)}}
+
+/* الموبايل: السايد بار بيبقى شريط تحت، ودايرة صفرا بتتزحلق للتاب المفتوح */
 @media (max-width:900px){
   .app{grid-template-columns:1fr;align-content:start}
-  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;background:var(--night);color:var(--night-ink);position:sticky;top:0;z-index:20}
+  .topbar{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--night);color:var(--night-ink);position:sticky;top:0;z-index:20}
   .topbar .logo{color:var(--night-ink);font-size:1.4rem}
-  .menu-btn{border:1px solid var(--night-rule);background:none;color:var(--night-ink);border-radius:6px;padding:6px 10px;cursor:pointer;display:flex}
-  .sidebar{position:fixed;top:0;bottom:0;right:0;width:min(290px,86vw);z-index:40;transform:translateX(100%);transition:transform .25s ease;height:100%}
-  .app.nav-open .sidebar{transform:none}
-  .app.nav-open .scrim{display:block;position:fixed;inset:0;background:rgb(0 0 0/.5);z-index:30}
+  .sidebar{display:contents}
+  .sidebar>.logo,.me,.side-foot,#coach-nav .group,.nav-long,#side-nav a.in-more{display:none}
+  #side-nav .late,#side-nav a[data-view="feedback"],#side-nav .more-btn{order:1} /* الكوتش: الوجبات بعد التمارين */
+  #coach-nav{display:contents}
+  .panel.acct-links{display:flex;flex-flow:row wrap;gap:10px}
+  .acct-links .btn{flex:1 1 140px}
+
+  #side-nav{--ease:cubic-bezier(.65,0,.35,1);position:fixed;right:10px;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:30;flex-direction:row;gap:0;height:64px;background:var(--night);border-radius:18px;box-shadow:0 8px 24px rgb(0 0 0/.25)}
+  #side-nav a,#side-nav .more-btn{position:relative;z-index:1;flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;padding:0 2px 13px;border:0;border-radius:0;background:none;box-shadow:none;color:var(--night-mute);font:inherit;font-size:.7rem;line-height:14px;white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  #side-nav a svg,#side-nav .more-btn svg{width:22px;height:22px}
+  #side-nav.ready a svg,#side-nav.ready .more-btn svg{transition:transform .45s var(--ease),color .3s}
+  /* النقط بتلف لوحدها، مش الأيقونة كلها، عشان اللف ما يحرّكش الأيقونة من نص الدايرة */
+  #side-nav .more-btn .dots{transform-box:fill-box;transform-origin:center;transition:transform .3s var(--ease)}
+  #side-nav .more-btn[aria-expanded="true"] .dots{transform:rotate(90deg)}
+  #side-nav a[aria-current="page"],#side-nav .more-btn.on{color:var(--night-ink);font-weight:600;background:none}
+  /* الأيقونة (22) + مسافة (2) + الاسم (14) = 38 في نص الشريط (64): 13 فوق و13 تحت، فمركز الأيقونة على 24.
+     مركز الدايرة على -28 + 62/2 = 3، فالأيقونة بتطلع 21 بالظبط */
+  #side-nav a[aria-current="page"] svg,#side-nav .more-btn.on svg{transform:translateY(-21px);color:var(--tape-ink)}
+  #side-nav .more-btn[hidden]{display:none}
+  .nav-ind{display:flex;justify-content:center;position:absolute;top:-28px;right:0;width:calc(100% / var(--n,4));transform:translateX(calc(var(--i,0) * -100%));pointer-events:none}
+  #side-nav.ready .nav-ind{transition:transform .45s var(--ease)}
+  .nav-ind::before{content:"";width:50px;height:50px;border-radius:50%;background:var(--tape);border:6px solid var(--paper)}
+
+  .main{padding-bottom:calc(110px + env(safe-area-inset-bottom))}
+  .toast{bottom:calc(88px + env(safe-area-inset-bottom))}
+  dialog.more-menu{margin:auto auto calc(84px + env(safe-area-inset-bottom))}
+}
+@media (max-width:900px) and (prefers-reduced-motion:reduce){
+  #side-nav.ready .nav-ind,#side-nav.ready a svg,#side-nav.ready .more-btn svg{transition:none}
 }
 
 .main{padding:clamp(24px,4vw,48px) clamp(16px,4vw,48px) 80px;min-width:0}
@@ -178,12 +220,6 @@ textarea.tall{min-height:240px}
 .toast.show{opacity:1;transform:translateX(-50%)}
 .toast.bad{background:var(--bad);color:#fff}
 
-/* القائمة المقفولة على الموبايل ما تتفتحش بالكيبورد */
-@media (max-width:900px){
-  .sidebar{visibility:hidden;transition:transform .25s ease,visibility 0s .25s}
-  .app.nav-open .sidebar{visibility:visible;transition-delay:0s}
-}
-
 /* ---------- لوحة الكوتش: نتايج المشتركين ---------- */
 .res-admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:24px}
 .res-admin{background:var(--paper-2);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0}
@@ -251,7 +287,7 @@ textarea.tall{min-height:240px}
   .hint{font-size:.8rem}
 
   .side-nav a{padding:13px 12px}
-  .main{padding:24px 16px 96px}
+  .main{padding:24px 16px calc(110px + env(safe-area-inset-bottom))}
   .view-head{gap:16px;margin-bottom:24px}
   .view-head .btn{width:100%}
   .view-head p{font-size:.95rem;margin-top:10px}
