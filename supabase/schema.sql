@@ -550,6 +550,20 @@ create policy "push subs read"   on public.push_subscriptions for select using (
 create policy "push subs insert" on public.push_subscriptions for insert with check (member_id = auth.uid());
 create policy "push subs delete" on public.push_subscriptions for delete using (member_id = auth.uid());
 
+-- الجدولة: لازم pg_cron و pg_net يكونوا متفعّلين (Dashboard ← Integrations ← Cron)
+-- قبل أول تشغيل حط السرّين في Vault مرة واحدة (مش هنا):
+--   select vault.create_secret('<نفس REMINDERS_SECRET اللي في الـ function>', 'reminders_secret');
+--   select vault.create_secret('https://<project-ref>.supabase.co', 'project_url');
+create extension if not exists pg_cron;
+create extension if not exists pg_net;
+select cron.schedule('send-reminders', '*/15 * * * *', $$
+  select net.http_post(
+    url     := (select decrypted_secret from vault.decrypted_secrets where name = 'project_url') || '/functions/v1/send-reminders',
+    headers := jsonb_build_object('Authorization', 'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'reminders_secret'))
+  ) $$);
+-- سجل تشغيل الـ cron بيكبر لوحده، فبنمسح الأقدم من أسبوع
+select cron.schedule('cleanup-cron-log', '0 3 * * *', $$ delete from cron.job_run_details where end_time < now() - interval '7 days' $$);
+
 -- 8) بيانات بداية (أمثلة تقدر تعدّلها أو تمسحها من لوحة الكوتش) ----------
 insert into public.exercises (muscle, name, sets, reps, cues, sort)
 select * from (values
