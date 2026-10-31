@@ -2,6 +2,7 @@
 import { supabase, esc, today } from "../supabase.js";
 import { toast, loadingView, confirmSheet } from "../ui.js";
 
+let isStale = () => false; // من ctx الصفحة الحالية، عشان أي حفظ بيخلص بعد ما المستخدم يمشي ما يرسمش فوق الصفحة الجديدة
 let list = [];
 let filter = "all";
 let search = "";
@@ -38,6 +39,7 @@ function addMonths(from, n) {
 const fmt = (iso) => iso ? new Date(iso).toLocaleDateString("ar-EG", { day: "numeric", month: "short", year: "numeric" }) : "—";
 
 export async function renderMembers(main, { stale }) {
+  isStale = stale;
   main.innerHTML = `${loadingView("list")}`;
   const { data, error } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
   if (stale()) return;
@@ -47,6 +49,7 @@ export async function renderMembers(main, { stale }) {
 }
 
 function draw(main) {
+  if (isStale()) return;
   const members = list.filter((p) => p.role !== "coach");
   const counts = { all: members.length, active: 0, soon: 0, expired: 0, inactive: 0 };
   members.forEach((p) => counts[memberStatus(p)]++);
@@ -70,6 +73,7 @@ function draw(main) {
         ${p.is_active
           ? `<button class="btn btn-ghost btn-sm" type="button" data-toggle>إيقاف</button>`
           : `<button class="btn btn-ink btn-sm" type="button" data-toggle>تفعيل</button>`}
+        <a class="btn btn-tape btn-sm" href="#plan/${p.id}">الخطة</a>
         <button class="btn btn-ghost btn-sm" type="button" data-add="1">+ شهر</button>
         <button class="btn btn-ghost btn-sm" type="button" data-add="3">+ ٣ شهور</button>
         <button class="btn btn-ghost btn-sm btn-del" type="button" data-del>حذف</button>

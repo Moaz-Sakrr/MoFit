@@ -52,15 +52,57 @@
 .side-nav a[aria-current="page"]{color:var(--night-ink);background:var(--night-2);box-shadow:inset -4px 0 0 var(--tape)}
 .side-foot{margin-top:auto;display:flex;flex-direction:column;gap:2px}
 .topbar{display:none}
-.scrim{display:none}
+.nav-ind,.more-btn,.panel.acct-links{display:none}
+dialog.more-menu{border:0;padding:0;background:var(--night);color:var(--night-ink);border-radius:16px;width:min(360px,92vw)}
+dialog.more-menu::backdrop{background:rgb(0 0 0/.5)}
+dialog.more-menu .side-nav{padding:12px}
+/* «المزيد» بتطلع من ناحية الزرار، والخانات بتدخل ورا بعض */
+dialog.more-menu[open]{transform-origin:left bottom;animation:menu-in .38s cubic-bezier(.2,1.1,.3,1)}
+dialog.more-menu[open] a{animation:menu-item .32s cubic-bezier(.2,.8,.3,1) backwards}
+dialog.more-menu[open] a:nth-child(2){animation-delay:.04s}
+dialog.more-menu[open] a:nth-child(3){animation-delay:.08s}
+dialog.more-menu[open] a:nth-child(4){animation-delay:.12s}
+dialog.more-menu[open] a:nth-child(5){animation-delay:.16s}
+dialog.more-menu[open].closing{animation:menu-out .18s ease-in forwards}
+dialog.more-menu[open].closing::backdrop{animation:fade .18s ease-in reverse forwards}
+@keyframes menu-in{from{opacity:0;transform:translateY(16px) scale(.85)}}
+@keyframes menu-out{to{opacity:0;transform:translateY(12px) scale(.92)}}
+@keyframes menu-item{from{opacity:0;transform:translateX(14px)}}
+
+/* الموبايل: السايد بار بيبقى شريط تحت، ودايرة صفرا بتتزحلق للتاب المفتوح */
 @media (max-width:900px){
   .app{grid-template-columns:1fr;align-content:start}
-  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;background:var(--night);color:var(--night-ink);position:sticky;top:0;z-index:20}
+  .topbar{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--night);color:var(--night-ink);position:sticky;top:0;z-index:20}
   .topbar .logo{color:var(--night-ink);font-size:1.4rem}
-  .menu-btn{border:1px solid var(--night-rule);background:none;color:var(--night-ink);border-radius:6px;padding:6px 10px;cursor:pointer;display:flex}
-  .sidebar{position:fixed;top:0;bottom:0;right:0;width:min(290px,86vw);z-index:40;transform:translateX(100%);transition:transform .25s ease;height:100%}
-  .app.nav-open .sidebar{transform:none}
-  .app.nav-open .scrim{display:block;position:fixed;inset:0;background:rgb(0 0 0/.5);z-index:30}
+  .sidebar{display:contents}
+  .sidebar>.logo,.me,.side-foot,#coach-nav .group,.nav-long,#side-nav a.in-more{display:none}
+  #side-nav .late,#side-nav a[data-view="feedback"],#side-nav .more-btn{order:1} /* الكوتش: الوجبات بعد التمارين */
+  #coach-nav{display:contents}
+  .panel.acct-links{display:flex;flex-flow:row wrap;gap:10px}
+  .acct-links .btn{flex:1 1 140px}
+
+  #side-nav{--ease:cubic-bezier(.65,0,.35,1);position:fixed;right:10px;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:30;flex-direction:row;gap:0;height:64px;background:var(--night);border-radius:18px;box-shadow:0 8px 24px rgb(0 0 0/.25)}
+  #side-nav a,#side-nav .more-btn{position:relative;z-index:1;flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;padding:0 2px 13px;border:0;border-radius:0;background:none;box-shadow:none;color:var(--night-mute);font:inherit;font-size:.7rem;line-height:14px;white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  #side-nav a svg,#side-nav .more-btn svg{width:22px;height:22px}
+  #side-nav.ready a svg,#side-nav.ready .more-btn svg{transition:transform .45s var(--ease),color .3s}
+  /* النقط بتلف لوحدها، مش الأيقونة كلها، عشان اللف ما يحرّكش الأيقونة من نص الدايرة */
+  #side-nav .more-btn .dots{transform-box:fill-box;transform-origin:center;transition:transform .3s var(--ease)}
+  #side-nav .more-btn[aria-expanded="true"] .dots{transform:rotate(90deg)}
+  #side-nav a[aria-current="page"],#side-nav .more-btn.on{color:var(--night-ink);font-weight:600;background:none}
+  /* الأيقونة (22) + مسافة (2) + الاسم (14) = 38 في نص الشريط (64): 13 فوق و13 تحت، فمركز الأيقونة على 24.
+     مركز الدايرة على -28 + 62/2 = 3، فالأيقونة بتطلع 21 بالظبط */
+  #side-nav a[aria-current="page"] svg,#side-nav .more-btn.on svg{transform:translateY(-21px);color:var(--tape-ink)}
+  #side-nav .more-btn[hidden]{display:none}
+  .nav-ind{display:flex;justify-content:center;position:absolute;top:-28px;right:0;width:calc(100% / var(--n,4));transform:translateX(calc(var(--i,0) * -100%));pointer-events:none}
+  #side-nav.ready .nav-ind{transition:transform .45s var(--ease)}
+  .nav-ind::before{content:"";width:50px;height:50px;border-radius:50%;background:var(--tape);border:6px solid var(--paper)}
+
+  .main{padding-bottom:calc(110px + env(safe-area-inset-bottom))}
+  .toast{bottom:calc(88px + env(safe-area-inset-bottom))}
+  dialog.more-menu{margin:auto auto calc(84px + env(safe-area-inset-bottom))}
+}
+@media (max-width:900px) and (prefers-reduced-motion:reduce){
+  #side-nav.ready .nav-ind,#side-nav.ready a svg,#side-nav.ready .more-btn svg{transition:none}
 }
 
 .main{padding:clamp(24px,4vw,48px) clamp(16px,4vw,48px) 80px;min-width:0}
@@ -107,28 +149,27 @@
 .empty{border:2px dashed var(--rule);border-radius:6px;padding:40px;text-align:center;color:var(--ink-2)}
 
 /* نافذة الفيديو */
-dialog.video{border:0;padding:0;background:transparent;width:min(960px,94vw);max-width:none;max-height:92vh;overflow:visible}
+/* --ar: نسبة عرض الفيديو لطوله، youtube.js بيحطها. الإطار بياخدها عشان مايبقاش فيه شرايط سودا والعلامة تفضل فوق الصورة */
+dialog.video{--ar:16/9;border:0;padding:0;background:transparent;width:min(960px,94vw,calc(80vh * var(--ar)));max-width:none;max-height:92vh;overflow:visible}
 dialog.video::backdrop{background:rgb(5 6 7/.85)}
-.video-frame{position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:8px;overflow:hidden}
-dialog.video.vertical{width:min(420px,92vw)}
-dialog.video.vertical .video-frame{aspect-ratio:9/16;max-height:80vh}
+.video-frame{position:relative;width:100%;aspect-ratio:var(--ar);background:#000;border-radius:8px;overflow:hidden}
 .video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .video-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;color:#fff;margin-bottom:10px}
-.video-bar h2{font-size:1.5rem}
+.video-bar h2{font-size:1.5rem;margin-inline-end:auto}
 .video-bar button{border:1px solid rgb(255 255 255/.4);background:none;color:#fff;border-radius:6px;padding:6px 14px;cursor:pointer}
+/* العلامة المائية: بتنقل لركن تاني كل 20 ثانية عشان ما تتقصّش بسهولة */
+.video-mark{position:absolute;z-index:1;pointer-events:none;direction:ltr;white-space:nowrap;font-size:12px;color:rgb(255 255 255/.4);text-shadow:0 0 2px rgb(0 0 0/.6);animation:wm 80s infinite}
+@keyframes wm{
+  0%{top:4%;left:4%;transform:none;animation-timing-function:step-end}
+  25%{top:4%;left:96%;transform:translateX(-100%);animation-timing-function:step-end}
+  50%{top:96%;left:96%;transform:translate(-100%,-100%);animation-timing-function:step-end}
+  75%{top:96%;left:4%;transform:translateY(-100%);animation-timing-function:step-end}
+}
+/* التكبير: الإطار بيفضل بنسبة الفيديو جوه الشاشة */
+dialog.video.full{width:100vw;height:100dvh;max-height:none;background:#000}
+dialog.video.full .video-frame{width:min(100%,calc((100dvh - 60px) * var(--ar)));margin-inline:auto;border-radius:0}
 
 /* ---------- الجداول ---------- */
-.prog-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:clamp(28px,4vw,48px)}
-.prog{display:flex;flex-direction:column;gap:14px;min-width:0;background:var(--paper-2);border-radius:8px;padding:24px}
-.prog h3{font-size:1.9rem}
-.lvl{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:.9rem;color:var(--ink-2)}
-.plate{display:inline-flex;align-items:center;gap:8px;font-weight:600;color:var(--ink)}
-.plate i{width:15px;height:15px;border-radius:50%;border:4px solid}
-.l1 i{border-color:#1f8a4c}.l2 i{border-color:#d1a000}.l3 i{border-color:#1d5fbf}
-.day h4{margin:6px 0 4px;font-size:1rem;font-weight:600}
-.sets{width:100%;border-collapse:collapse;font-size:.95rem}
-.sets td{padding:8px 0;border-bottom:1px solid var(--rule)}
-.sets td.n{text-align:left;direction:ltr;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--ink-2);padding-inline-start:12px}
 .legend{font-size:.85rem;color:var(--ink-2);margin-top:24px}
 
 /* ---------- حسابي ---------- */
@@ -178,12 +219,6 @@ textarea.tall{min-height:240px}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--night);color:var(--night-ink);padding:10px 18px;border-radius:6px;font-size:.92rem;opacity:0;pointer-events:none;transition:all .2s;z-index:60;box-shadow:0 10px 30px rgb(0 0 0/.3)}
 .toast.show{opacity:1;transform:translateX(-50%)}
 .toast.bad{background:var(--bad);color:#fff}
-
-/* القائمة المقفولة على الموبايل ما تتفتحش بالكيبورد */
-@media (max-width:900px){
-  .sidebar{visibility:hidden;transition:transform .25s ease,visibility 0s .25s}
-  .app.nav-open .sidebar{visibility:visible;transition-delay:0s}
-}
 
 /* ---------- لوحة الكوتش: نتايج المشتركين ---------- */
 .res-admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:24px}
@@ -252,7 +287,7 @@ textarea.tall{min-height:240px}
   .hint{font-size:.8rem}
 
   .side-nav a{padding:13px 12px}
-  .main{padding:24px 16px 96px}
+  .main{padding:24px 16px calc(110px + env(safe-area-inset-bottom))}
   .view-head{gap:16px;margin-bottom:24px}
   .view-head .btn{width:100%}
   .view-head p{font-size:.95rem;margin-top:10px}
@@ -273,10 +308,6 @@ textarea.tall{min-height:240px}
   .more{border:0;background:none;padding:4px 0;cursor:pointer;color:var(--ink);font:inherit;font-size:.85rem;font-weight:600;text-decoration:underline;text-underline-offset:4px;width:fit-content}
   .row-acts{gap:10px}
   .row-acts .btn{flex:1}
-  .prog-grid{gap:20px}
-  .prog{padding:20px 16px;gap:16px}
-  .prog h3{font-size:1.7rem}
-  .sets td{padding:10px 0}
   .legend{margin-top:20px}
   .account{gap:20px}
   .panel{padding:20px 16px;gap:18px}
@@ -313,6 +344,50 @@ textarea.tall{min-height:240px}
 .sheet-text{color:var(--ink-2)}
 .empty.gap-top{margin-top:24px}
 
+/* ---------- آراء المتدربين (feedback) ---------- */
+.panel.fb{grid-column:1/-1}
+.fb-sub{color:var(--ink-2);font-size:.95rem;margin-top:-8px}
+.fb-form{display:flex;flex-direction:column;gap:16px}
+.fb-form .btn{align-self:flex-start}
+/* النجوم: radio مخفي + label. بالـ RTL أول نجمة على اليمين */
+.stars{border:0;margin:0;padding:0;position:relative;min-width:0}
+.stars legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:4px}
+.stars label{display:inline-block;font-size:2.1rem;line-height:1;padding:2px 3px;cursor:pointer;color:color-mix(in srgb,var(--ink) 22%,transparent);transition:color .1s,transform .1s}
+.stars input:checked + label,.stars label:has(~ input:checked){color:var(--tape)}
+.stars:has(label:hover) label{color:color-mix(in srgb,var(--ink) 22%,transparent)}
+.stars:has(label:hover) label:hover,.stars:has(label:hover) label:has(~ label:hover){color:var(--tape)}
+.stars label:hover{transform:scale(1.12)}
+.stars input:focus-visible + label{outline:3px solid var(--tape);outline-offset:2px;border-radius:4px}
+.days{border:0;margin:0 0 12px;padding:0;display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.days legend{font-weight:600;font-size:.9rem;padding:0;margin-bottom:4px;width:100%}
+.days label{padding:6px 12px;border-radius:999px;border:1px solid var(--rule);background:var(--paper-2);cursor:pointer;font-size:.92rem;user-select:none}
+.days input:checked + label{background:var(--tape);border-color:var(--tape);color:var(--tape-ink);font-weight:700}
+.days input:focus-visible + label{outline:3px solid var(--tape);outline-offset:2px}
+#push-box{margin-top:14px}
+.fb-stars{color:var(--tape);letter-spacing:1px;font-size:1.05rem;white-space:nowrap}
+.fb-stars i{font-style:normal;color:color-mix(in srgb,var(--ink) 22%,transparent)}
+.fb-h{font-size:1.25rem;margin-top:8px}
+.fb-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.fb-item{display:flex;flex-direction:column;gap:8px;padding-bottom:12px;border-bottom:1px solid var(--rule)}
+.fb-list .fb-item:last-child{border-bottom:0;padding-bottom:0}
+.fb-top{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px}
+.fb-top b{font-size:1.1rem}
+.fb-date{color:var(--ink-2);font-size:.85rem}
+.fb-msg{white-space:pre-wrap;overflow-wrap:anywhere;max-width:70ch}
+.fb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr));gap:20px}
+.fb-card{background:var(--paper-2);border-radius:8px;padding:18px;border:0}
+.fb-card.new{box-shadow:inset -4px 0 0 var(--tape)}
+.summary .stat{background:var(--paper-2);padding:16px 18px;display:flex;flex-direction:column;gap:2px}
+.summary .stat b{font-size:2rem;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.summary .stat span{font-size:.88rem;color:var(--ink-2)}
+.fb-public{align-items:center;padding-top:10px;border-top:1px solid var(--rule)}
+.fb-note{color:var(--ink-2);font-size:.85rem}
+@media (max-width:640px){
+  .stars label{font-size:2.4rem;padding:4px}
+  .fb-form .btn{align-self:stretch}
+  .summary .stat{grid-column:1/-1;padding:14px 16px}
+}
+
 /* ---------- حركة خفيفة (بتتقفل لوحدها مع «تقليل الحركة» من base.css) ---------- */
 /* المحتوى بيظهر بنعومة كل ما الصفحة أو العضلة تتغير. العنوان والتبويبات ثابتين عشان ما يرمشوش.
    backwards مش both: عشان ما يفضلش transform بعد الحركة */
@@ -333,3 +408,136 @@ dialog[open]::backdrop{animation:fade .2s ease-out}
   dialog.sheet[open]{animation:rise .25s cubic-bezier(.2,.7,.2,1)}
   @keyframes rise{from{transform:translateY(24px);opacity:0}}
 }
+
+/* خطة التمرين وتسجيل الأوزان */
+.plan-day .view-head{margin-bottom:0}
+.plan-day h2{font-size:1.6rem}
+.wk-ex .row-title{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:4px 14px}
+.wk-ex .row-title h3{align-self:end}
+.wk-ex .row-title .dose{align-self:start;justify-self:start}
+.wk-thumb{width:150px;grid-row:span 2}
+.wk-thumb .play span{width:38px;height:38px}
+.wk-thumb .play svg{width:16px;height:16px}
+.wk-ex .legend{margin-top:14px}
+.wk-actions{display:flex;gap:10px;margin-top:14px}
+.wk-actions .btn{flex:1;min-height:44px}
+.wk-head,.wk-set{display:grid;grid-template-columns:2.6rem 1fr 1fr 92px;align-items:stretch}
+.wk-head{font-size:.8rem;color:var(--ink-2);text-align:center;margin-top:12px}
+/* كل مجموعة صف واحد بحدود، وخطوط فاصلة بين رقم المجموعة والوزن والعدات والزرار */
+.wk-swipe{position:relative;display:grid;grid-template-rows:1fr;margin-top:8px;border-radius:10px;overflow:hidden;transition:grid-template-rows .3s ease,margin-top .3s ease,opacity .25s ease}
+.wk-swipe>.wk-set{position:relative;z-index:1;min-height:0;touch-action:pan-y;user-select:none;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.wk-swipe.drag>.wk-set{transition:none}
+.wk-swipe.open>.wk-set{transform:translateX(-88px)}
+.wk-swipe.leaving{grid-template-rows:0fr;margin-top:0;opacity:0}
+.wk-swipe.leaving>.wk-set{transform:translateX(-110%)}
+.wk-del{position:absolute;right:0;top:0;bottom:0;width:88px;border:0;background:var(--bad);color:#fff;font:inherit;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer}
+.wk-del svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.wk-swipe.open .wk-del svg{animation:wk-pop .35s ease-out}
+.wk-swipe.peek>.wk-set{animation:wk-peek .9s .2s ease-in-out}
+@keyframes wk-pop{0%{transform:scale(.4) rotate(-12deg)}60%{transform:scale(1.2) rotate(6deg)}100%{transform:none}}
+@keyframes wk-peek{0%,100%{transform:none}40%,60%{transform:translateX(-36px)}}
+.wk-set{border:1px solid var(--rule);border-radius:10px;overflow:hidden;background:var(--paper)}
+.wk-set .n{display:grid;place-items:center;font-family:var(--latin);font-weight:700;font-size:1.15rem;background:var(--paper-2);color:var(--ink-2);border-inline-end:1px solid var(--rule)}
+.wk-val{width:100%;min-height:48px;font-family:var(--latin);font-size:1.2rem;font-weight:700;text-align:center;border:0;border-inline-end:1px solid var(--rule);border-radius:0;background:transparent;color:var(--ink);padding:6px;cursor:pointer}
+.wk-val.ph{color:var(--ink-2);font-weight:400}
+.wk-set .btn{border-radius:0;min-height:48px;padding-inline:6px}
+.wk-set.done{border-color:var(--ok)}
+.wk-set.done .n{background:var(--ok);color:#fff}
+.wk-set.done .n,.wk-set.done .wk-val{border-inline-end-color:var(--ok)}
+/* عجلات اختيار الوزن والعدات */
+.wheel-labels,.wheels{direction:ltr;display:grid;grid-template-columns:1.4fr 1fr 1.4fr;gap:0}
+.wheel-labels{margin-top:4px}
+.wheel-labels{font-size:.85rem;color:var(--ink-2);text-align:center}
+.wheel-labels span:first-child{grid-column:span 2}
+.wheels{position:relative;gap:0;border:1px solid var(--rule);border-radius:12px;overflow:hidden}
+.wheel+.wheel{border-inline-start:1px dashed var(--rule)}
+.wheel+.wheel+.wheel{border-inline-start:2px solid var(--rule)}
+.wheels::after{content:"";position:absolute;inset-inline:0;top:80px;height:40px;border-block:2px solid var(--rule);background:rgb(128 128 128/.12);border-radius:8px;pointer-events:none}
+.wheel{direction:ltr;height:200px;overflow-y:auto;padding-block:80px;scroll-padding-block:80px;scroll-snap-type:y mandatory;overscroll-behavior:contain;scrollbar-width:none;outline-offset:-2px;-webkit-mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent);mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent)}
+.wheel::-webkit-scrollbar{display:none}
+.wheel-i{height:40px;line-height:40px;scroll-snap-align:start;text-align:center;font-family:var(--latin);font-size:1.3rem;color:var(--ink-2);cursor:pointer;user-select:none}
+.wheel-i.sel{color:var(--ink);font-weight:700;font-size:1.7rem}
+@media (max-width:640px){.wk-thumb{width:128px}}
+
+/* تأكيد تسجيل المجموعة + رسالة إنهاء التمرين */
+.tick{width:1em;height:1em;vertical-align:-.12em;margin-inline-end:4px;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:24;stroke-dashoffset:0}
+.wk-set.pulse{animation:wk-pulse .5s ease-out}
+.wk-set.pulse .tick{animation:wk-draw .35s .1s ease-out backwards}
+@keyframes wk-pulse{0%{transform:scale(1);box-shadow:0 0 0 0 rgb(31 138 76/.5)}40%{transform:scale(1.03);box-shadow:0 0 0 6px rgb(31 138 76/.25)}100%{transform:scale(1);box-shadow:0 0 0 0 rgb(31 138 76/0)}}
+@keyframes wk-draw{from{stroke-dashoffset:24}}
+.cheer{text-align:center;display:flex;flex-direction:column;gap:18px;align-items:center}
+.cheer-badge{width:72px;height:72px;border-radius:50%;background:var(--tape);color:var(--tape-ink);display:grid;place-items:center;font-size:2.2rem;animation:cheer-pop .5s cubic-bezier(.2,1.4,.4,1)}
+.cheer-badge .tick{margin:0}
+.cheer-stats{display:flex;gap:24px;justify-content:center}
+.cheer-stats div{display:flex;flex-direction:column}
+.cheer-stats b{font-family:var(--latin);font-size:2rem;line-height:1}
+.cheer-stats span{font-size:.85rem;color:var(--ink-2)}
+@keyframes cheer-pop{from{transform:scale(.4);opacity:0}}
+@media (prefers-reduced-motion:reduce){.wk-swipe,.wk-swipe>.wk-set,.wk-swipe.peek>.wk-set,.wk-swipe.open .wk-del svg{animation:none;transition:none}.wk-set.pulse,.wk-set.pulse .tick,.cheer-badge{animation:none}}
+
+/* نافذة "تطوري" */
+.hist-stats{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:10px;margin-bottom:16px}
+.hist-stats div{background:var(--paper-2);border-radius:8px;padding:12px 8px;text-align:center;display:flex;flex-direction:column;gap:2px}
+.hist-stats b{font-family:var(--latin);font-size:1.7rem;line-height:1.1}
+.hist-stats span{font-size:.75rem;color:var(--ink-2)}
+.hist-stats .up b{color:var(--ok)}.hist-stats .down b{color:var(--bad)}
+.chart{width:100%;display:block;color:var(--ink);background:var(--paper-2);border-radius:8px;padding:8px 4px;margin-bottom:16px}
+.chart .grid{stroke:var(--rule);stroke-width:1;stroke-dasharray:3 4}
+.chart .dot{fill:var(--paper-2);stroke:currentColor;stroke-width:2.5}
+.chart .dot.last{fill:var(--tape);stroke:var(--ink)}
+.chart .val{font:700 11px var(--latin);fill:currentColor}
+.chart .day{font:10px var(--body);fill:var(--ink-2)}
+.hist{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;max-height:34vh;overflow:auto}
+.hist li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--rule)}
+.hist li:last-child{border-bottom:0}
+.hist-date{font-weight:700;white-space:nowrap}
+.hist-sets{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.chip{font-family:var(--latin);font-size:1rem;font-variant-numeric:tabular-nums;background:var(--paper-2);border-radius:999px;padding:2px 10px}
+.chip.top{background:var(--tape);color:var(--tape-ink);font-weight:700}
+
+/* كروت التمارين في الخطة */
+.xcards{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+.xcard{display:grid;grid-template-columns:220px minmax(0,1fr) auto;gap:8px 20px;align-items:center;background:var(--paper-2);border:1px solid var(--rule);border-radius:12px;padding:12px;transition:border-color .15s,transform .15s}
+.xcard:hover{border-color:var(--tape)}
+.xcard .thumb{border-radius:8px}
+.xcard-body{display:flex;flex-direction:column;gap:8px;min-width:0}
+.xcard h3{font-size:1.35rem;line-height:1.3}
+.xcard-dose{display:flex;flex-wrap:wrap;gap:6px}
+.xcard-dose span{background:var(--paper);border:1px solid var(--rule);border-radius:999px;padding:2px 12px;font-size:.85rem;color:var(--ink-2)}
+.xcard-dose b{font-family:var(--latin);font-size:1.15rem;color:var(--ink);margin-inline-end:2px}
+.xcard p{color:var(--ink-2);font-size:.92rem;border-inline-start:3px solid var(--tape);padding-inline-start:10px}
+.xcard-acts{display:flex;gap:8px;flex-wrap:wrap}
+@media (max-width:640px){
+  .xcards{gap:16px}
+  .xcard{grid-template-columns:minmax(0,1fr);gap:14px;padding:14px;align-items:stretch}
+  .xcard .thumb{aspect-ratio:2/1}
+  .xcard .thumb .play span{width:48px;height:48px}
+  .xcard-body{gap:10px}
+  .xcard h3{font-size:1.3rem}
+  .xcard-dose span{padding:5px 16px;font-size:.9rem}
+  .xcard-dose b{font-size:1.25rem}
+  .xcard-acts .btn{flex:1;min-height:46px;font-size:1rem}
+}
+
+/* ---------- الوجبات: الفيديو فوق (نفس .thumb بتاع التمارين) وتحته السعرات والوصف والمكونات ---------- */
+.meal-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:24px}
+.meal{background:var(--paper-2);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.meal .thumb{background:var(--paper)}
+.meal-body{display:flex;flex-direction:column;gap:8px;min-width:0;padding-inline:4px}
+.meal h3{font-size:1.45rem}
+.meal .dose{background:var(--paper)}
+.meal-desc{color:var(--ink-2);font-size:.95rem;white-space:pre-wrap;overflow-wrap:anywhere}
+.meal-h{font-size:.95rem;font-weight:600;margin:6px 0 0}
+.meal-ing{margin:0;padding-inline-start:20px;display:flex;flex-direction:column;gap:2px;font-size:.95rem;overflow-wrap:anywhere}
+.meal-ing li::marker{color:var(--tape)}
+.meal .row-acts{margin-top:auto;padding-inline:4px}
+@media (max-width:640px){
+  .meal-grid{gap:18px}
+  .meal h3{font-size:1.3rem}
+  .meal .row-acts .btn{flex:1}
+}
+.meal-cat{font-size:.78rem;font-weight:600;background:var(--tape);color:var(--tape-ink);padding:1px 10px;border-radius:999px;width:fit-content}
+.meal-ing:not(.open) li:nth-child(n+3){display:none}
+.ing-more{display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:4px 0;cursor:pointer;color:var(--ink);font:inherit;font-size:.88rem;font-weight:600;width:fit-content}
+.ing-more svg{width:16px;height:16px;color:var(--tape);transition:transform .2s}
+.ing-more[aria-expanded="true"] svg{transform:rotate(180deg)}

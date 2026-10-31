@@ -4,9 +4,11 @@ import { toast, openSheet, confirmSheet, loadingView } from "../ui.js";
 import { compressImage } from "../images.js";
 
 const BUCKET = "results";
+let isStale = () => false; // من ctx الصفحة الحالية، عشان أي حفظ بيخلص بعد ما المستخدم يمشي ما يرسمش فوق الصفحة الجديدة
 let list = [];
 
 export async function renderResults(main, { stale }) {
+  isStale = stale;
   main.innerHTML = `${loadingView("cards")}`;
   const { data, error } = await supabase.from("results").select("*").order("sort").order("id");
   if (stale()) return;
@@ -30,6 +32,7 @@ async function removeFiles(urls) {
 }
 
 function draw(main) {
+  if (isStale()) return;
   const cards = list.map((r) => `<article class="res-admin">
     <div class="pair-img"><figure><img src="${esc(r.before_url)}" alt="قبل" loading="lazy"><figcaption>قبل</figcaption></figure>
       <figure><img src="${esc(r.after_url)}" alt="بعد" loading="lazy"><figcaption>بعد</figcaption></figure></div>

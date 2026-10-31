@@ -15,6 +15,8 @@ create table if not exists public.profiles (
   notes            text not null default '',
   created_at       timestamptz not null default now()
 );
+-- آخر مرة المتدرب بعت فيها رأيه (بيتحدّث من trigger الـ feedback بس)
+alter table public.profiles add column if not exists last_feedback_at timestamptz;
 
 -- 2) التمارين ----------------------------------------------------------
 create table if not exists public.exercises (
@@ -93,6 +95,10 @@ begin
     new.email            := old.email;
     new.id               := old.id;
     new.created_at       := old.created_at;
+  end if;
+  -- وقت آخر feedback محدش يغيّره بإيده (ولا الكوتش)، بيتحدّث بس من trigger الـ feedback (عمق > 1)
+  if auth.uid() is not null and pg_trigger_depth() < 2 then
+    new.last_feedback_at := old.last_feedback_at;
   end if;
   return new;
 end $$;
@@ -268,6 +274,319 @@ begin
 end $$;
 revoke all on function public.delete_member(uuid) from public, anon;
 grant execute on function public.delete_member(uuid) to authenticated;
+
+-- 7.10) آراء المتدربين (feedback) -------------------------------------------------
+-- المتدرب يبعت تقييم من 1 لـ 5 ورأي مكتوب للكوتش، مرة واحدة كل 24 ساعة.
+-- الكوتش يقرا الكل ويعلّم اللي قراه. المتدرب يحذف رأيه، بس الحذف ما بيرجّعش الفرصة.
+create table if not exists public.feedback (
+  id         bigint generated always as identity primary key,
+  member_id  uuid not null default auth.uid() references public.profiles(id) on delete cascade,
+  rating     int  not null check (rating between 1 and 5),
+  message    text not null check (char_length(btrim(message)) between 1 and 1000),
+  coach_seen boolean not null default false,
+  created_at timestamptz not null default now()
+);
+-- allow_public: قرار المتدرب إن رأيه يتعرض في الصفحة الرئيسية. featured: اختيار الكوتش
+-- الرأي بيظهر للزوار بس لو الاتنين true، فلو المتدرب سحب موافقته بيختفي لوحده
+alter table public.feedback add column if not exists allow_public boolean not null default false;
+alter table public.feedback add column if not exists featured     boolean not null default false;
+create index if not exists feedback_member_idx  on public.feedback (member_id, created_at desc);
+create index if not exists feedback_created_idx on public.feedback (created_at desc);
+alter table public.feedback enable row level security;
+
+-- مرة كل 24 ساعة، والوقت محفوظ في profiles عشان الحذف ما يصفّرش العداد
+create or replace function public.feedback_once_a_day()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare last timestamptz;
+begin
+  -- الـ trigger بيشتغل قبل RLS، فنتأكد الأول إن الرأي باسم صاحبه قبل ما نلمس profile حد تاني
+  if auth.uid() is not null and new.member_id is distinct from auth.uid() then
+    raise exception 'مينفعش تبعت رأي باسم حد تاني';
+  end if;
+  -- for update: لو اتبعت طلبين في نفس اللحظة، التاني يستنى الأول ويترفض
+  select last_feedback_at into last from profiles where id = new.member_id for update;
+  if last is not null and now() < last + interval '24 hours' then
+    raise exception 'بعت رأيك في آخر ٢٤ ساعة. تقدر تبعت رأي جديد بعد %',
+      to_char((last + interval '24 hours') at time zone 'Africa/Cairo', 'YYYY-MM-DD HH24:MI');
+  end if;
+  new.created_at := now();
+  new.coach_seen := false;
+  new.featured   := false;
+  update profiles set last_feedback_at = now() where id = new.member_id;
+  return new;
+end $$;
+drop trigger if exists feedback_once_a_day on public.feedback;
+create trigger feedback_once_a_day before insert on public.feedback
+  for each row execute function public.feedback_once_a_day();
+
+-- الرأي نفسه محدش يعدّله. الكوتش يعدّل «اتقرا» و«معروض في الرئيسية»، والمتدرب يعدّل موافقته على النشر بس
+create or replace function public.protect_feedback()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  new.id         := old.id;
+  new.member_id  := old.member_id;
+  new.rating     := old.rating;
+  new.message    := old.message;
+  new.created_at := old.created_at;
+  if auth.uid() is not null then
+    if public.is_coach() then
+      new.allow_public := old.allow_public;
+    else
+      new.coach_seen := old.coach_seen;
+      new.featured   := old.featured;
+    end if;
+  end if;
+  return new;
+end $$;
+drop trigger if exists protect_feedback on public.feedback;
+create trigger protect_feedback before update on public.feedback
+  for each row execute function public.protect_feedback();
+
+-- القراءة: صاحبه والكوتش. الإضافة: المتدرب لنفسه (حتى لو اشتراكه خلص). التعديل: الاتنين (والـ trigger بيحدد مين يعدّل إيه). الحذف: صاحبه
+drop policy if exists "feedback read"   on public.feedback;
+drop policy if exists "feedback insert" on public.feedback;
+drop policy if exists "feedback update" on public.feedback;
+drop policy if exists "feedback delete" on public.feedback;
+create policy "feedback read"   on public.feedback for select using (member_id = auth.uid() or public.is_coach());
+create policy "feedback insert" on public.feedback for insert with check (member_id = auth.uid() and not public.is_coach());
+create policy "feedback update" on public.feedback for update using (member_id = auth.uid() or public.is_coach()) with check (member_id = auth.uid() or public.is_coach());
+create policy "feedback delete" on public.feedback for delete using (member_id = auth.uid());
+
+-- آراء الصفحة الرئيسية: الزوار مش بيقروا الجدول نفسه، بياخدوا الاسم الأول والتقييم والنص بس
+create or replace function public.public_feedback()
+returns table (name text, rating int, message text, created_at timestamptz)
+language sql stable security definer set search_path = public as $$
+  select coalesce(nullif(split_part(btrim(p.full_name), ' ', 1), ''), 'متدرب'), f.rating, f.message, f.created_at
+  from feedback f join profiles p on p.id = f.member_id
+  where f.featured and f.allow_public
+  order by f.created_at desc
+  limit 50;
+$$;
+revoke all on function public.public_feedback() from public;
+grant execute on function public.public_feedback() to anon, authenticated;
+
+-- 7.11) خطط التمرين الشخصية وتسجيل الأوزان ------------------------------------
+-- الكوتش يبني لكل متدرب خطة (أيام ← تمارين من مكتبة التمارين الموجودة). المتدرب يسجّل وزن وعدات كل مجموعة.
+-- السجلات (workout_sessions / set_logs) مش مربوطة بصفوف الخطة، فتعديل الخطة أو حذفها ما بيمسحش التاريخ.
+create table if not exists public.workout_plans (
+  id         bigint generated always as identity primary key,
+  member_id  uuid not null unique references public.profiles(id) on delete cascade,
+  name       text not null default 'خطتي',
+  created_at timestamptz not null default now()
+);
+create table if not exists public.workout_days (
+  id      bigint generated always as identity primary key,
+  plan_id bigint not null references public.workout_plans(id) on delete cascade,
+  name    text not null,
+  sort    int not null default 0
+);
+create table if not exists public.workout_items (
+  id          bigint generated always as identity primary key,
+  day_id      bigint not null references public.workout_days(id) on delete cascade,
+  exercise_id bigint references public.exercises(id) on delete set null,
+  sets        int not null check (sets between 1 and 20),
+  reps        text not null check (length(reps) between 1 and 20),
+  note        text check (length(note) <= 300),
+  sort        int not null default 0
+);
+create table if not exists public.workout_sessions (
+  id          bigint generated always as identity primary key,
+  member_id   uuid not null default auth.uid() references public.profiles(id) on delete cascade,
+  day_name    text not null,
+  started_at  timestamptz not null default now(),
+  finished_at timestamptz
+);
+create table if not exists public.set_logs (
+  id            bigint generated always as identity primary key,
+  session_id    bigint not null references public.workout_sessions(id) on delete cascade,
+  member_id     uuid not null default auth.uid() references public.profiles(id) on delete cascade,
+  exercise_id   bigint references public.exercises(id) on delete set null,
+  exercise_name text not null,
+  set_no        int not null check (set_no between 1 and 20),
+  weight        numeric(6,2) not null check (weight between 0 and 1000),
+  reps          int not null check (reps between 0 and 200),
+  created_at    timestamptz not null default now(),
+  unique (session_id, exercise_id, set_no)
+);
+create index if not exists workout_days_plan_idx    on public.workout_days (plan_id, sort);
+create index if not exists workout_items_day_idx    on public.workout_items (day_id, sort);
+create index if not exists workout_sessions_mem_idx on public.workout_sessions (member_id, started_at desc);
+create index if not exists set_logs_member_ex_idx   on public.set_logs (member_id, exercise_id, created_at desc);
+alter table public.workout_plans    enable row level security;
+alter table public.workout_days     enable row level security;
+alter table public.workout_items    enable row level security;
+alter table public.workout_sessions enable row level security;
+alter table public.set_logs         enable row level security;
+
+-- هل الخطة دي بتاعتي؟ (security definer عشان ما نعتمدش على RLS الجداول التانية جوه السياسات)
+create or replace function public.owns_plan(pid bigint)
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (select 1 from workout_plans where id = pid and member_id = auth.uid());
+$$;
+create or replace function public.owns_day(did bigint)
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (select 1 from workout_days d join workout_plans p on p.id = d.plan_id where d.id = did and p.member_id = auth.uid());
+$$;
+create or replace function public.owns_session(sid bigint)
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (select 1 from workout_sessions where id = sid and member_id = auth.uid());
+$$;
+
+-- الخطة: القراءة للمتدرب صاحبها (لو اشتراكه شغال) وللكوتش. الكتابة للكوتش بس
+drop policy if exists "wplans read"  on public.workout_plans;
+drop policy if exists "wplans write" on public.workout_plans;
+create policy "wplans read"  on public.workout_plans for select using (public.is_coach() or (member_id = auth.uid() and public.is_active_member()));
+create policy "wplans write" on public.workout_plans for all using (public.is_coach()) with check (public.is_coach());
+
+drop policy if exists "wdays read"  on public.workout_days;
+drop policy if exists "wdays write" on public.workout_days;
+create policy "wdays read"  on public.workout_days for select using (public.is_coach() or (public.owns_plan(plan_id) and public.is_active_member()));
+create policy "wdays write" on public.workout_days for all using (public.is_coach()) with check (public.is_coach());
+
+drop policy if exists "witems read"  on public.workout_items;
+drop policy if exists "witems write" on public.workout_items;
+create policy "witems read"  on public.workout_items for select using (public.is_coach() or (public.owns_day(day_id) and public.is_active_member()));
+create policy "witems write" on public.workout_items for all using (public.is_coach()) with check (public.is_coach());
+
+-- الجلسات والمجموعات: القراءة لصاحبها والكوتش. التسجيل للمتدرب المفعّل في جلساته هو بس
+drop policy if exists "wsess read"   on public.workout_sessions;
+drop policy if exists "wsess insert" on public.workout_sessions;
+drop policy if exists "wsess update" on public.workout_sessions;
+drop policy if exists "wsess delete" on public.workout_sessions;
+create policy "wsess read"   on public.workout_sessions for select using (member_id = auth.uid() or public.is_coach());
+create policy "wsess insert" on public.workout_sessions for insert with check (member_id = auth.uid() and public.is_active_member());
+create policy "wsess update" on public.workout_sessions for update using (member_id = auth.uid()) with check (member_id = auth.uid());
+create policy "wsess delete" on public.workout_sessions for delete using (member_id = auth.uid());
+
+drop policy if exists "wlogs read"   on public.set_logs;
+drop policy if exists "wlogs insert" on public.set_logs;
+drop policy if exists "wlogs update" on public.set_logs;
+drop policy if exists "wlogs delete" on public.set_logs;
+create policy "wlogs read"   on public.set_logs for select using (member_id = auth.uid() or public.is_coach());
+create policy "wlogs insert" on public.set_logs for insert with check (member_id = auth.uid() and public.is_active_member() and public.owns_session(session_id));
+create policy "wlogs update" on public.set_logs for update using (member_id = auth.uid()) with check (member_id = auth.uid() and public.owns_session(session_id));
+create policy "wlogs delete" on public.set_logs for delete using (member_id = auth.uid());
+
+-- 7.12) حدود ضد ملء المخزن وقاعدة البيانات -------------------------------------------
+-- قبل ما تطبّق القسم ده على الداتابيز الحقيقية: شغّل الاستعلام ده (قراءة بس)، ولازم كل الأعمدة تطلع 0،
+-- وإلا أوامر الـ add constraint هتفشل.
+-- select
+--   (select count(*) from public.profiles where char_length(full_name) > 100 or char_length(phone) > 30) as long_profiles,
+--   (select count(*) from public.workout_sessions where char_length(day_name) > 200) as long_session_days,
+--   (select count(*) from public.set_logs where char_length(exercise_name) > 300) as long_log_names,
+--   (select count(*) from public.workout_days where char_length(name) > 200) as long_days,
+--   (select count(*) from public.exercises where char_length(name) > 300) as long_exercises;
+-- (أ) الرفع على مخزن صور المتابعة: نفس حد الجدول (10 رفعات × 3 صور) بس على الملفات نفسها،
+-- لأن المتدرب يقدر يرفع ملفات على المخزن من غير ما يعمل صف في progress_photos
+create or replace function public.progress_files_recent()
+returns int language sql stable security definer set search_path = public, storage as $$
+  select count(*)::int from storage.objects
+  where bucket_id = 'progress-photos'
+    and (storage.foldername(name))[1] = auth.uid()::text
+    and created_at > now() - interval '31 days';
+$$;
+revoke all on function public.progress_files_recent() from public, anon;
+grant execute on function public.progress_files_recent() to authenticated;
+
+-- بتستبدل سياسة الرفع اللي في 7.7 وبتزوّد عليها حد الملفات
+drop policy if exists "progress files insert" on storage.objects;
+create policy "progress files insert" on storage.objects for insert
+  with check (bucket_id = 'progress-photos' and (storage.foldername(name))[1] = auth.uid()::text
+              and public.is_active_member() and public.progress_files_recent() < 30);
+
+-- (ب) أطوال النصوص اللي المتدرب بيكتبها
+alter table public.profiles drop constraint if exists profiles_text_len;
+alter table public.profiles add constraint profiles_text_len check (char_length(full_name) <= 100 and char_length(phone) <= 30);
+alter table public.workout_sessions drop constraint if exists workout_sessions_day_name_len;
+alter table public.workout_sessions add constraint workout_sessions_day_name_len check (char_length(day_name) <= 200);
+alter table public.set_logs drop constraint if exists set_logs_exercise_name_len;
+alter table public.set_logs add constraint set_logs_exercise_name_len check (char_length(exercise_name) <= 300);
+-- حدود على أسماء الكوتش (اليوم والتمرين) عشان نسخة المتدرب في الجلسات والسجل ما تعدّيش حدها وتفشل
+alter table public.workout_days drop constraint if exists workout_days_name_len;
+alter table public.workout_days add constraint workout_days_name_len check (char_length(name) <= 200);
+alter table public.exercises drop constraint if exists exercises_name_len;
+alter table public.exercises add constraint exercises_name_len check (char_length(name) <= 300);
+
+-- 7.13) الوجبات -------------------------------------------------------------------
+-- الكوتش يضيف وجبات بفيديو يوتيوب وتصنيف (فطار/غدا/عشا/سناك) وعدد السعرات والوصف والمكونات (كل مكون في سطر).
+-- المتدرب المفعّل والكوتش بس يشوفوها، زي التمارين بالظبط. الكتابة للكوتش بس
+create table if not exists public.meals (
+  id          bigint generated always as identity primary key,
+  name        text not null check (char_length(btrim(name)) between 1 and 200),
+  category    text not null default 'lunch',
+  calories    int  check (calories between 0 and 10000),
+  description text not null default '' check (char_length(description) <= 1000),
+  ingredients text not null default '' check (char_length(ingredients) <= 3000),
+  youtube_url text not null default '' check (char_length(youtube_url) <= 300),
+  sort        int  not null default 0,
+  created_at  timestamptz not null default now()
+);
+-- لو القسم ده اتشغّل على مشروع تجريبي قبل ما التصنيف يتضاف
+alter table public.meals add column if not exists category text not null default 'lunch';
+alter table public.meals drop constraint if exists meals_category_check;
+alter table public.meals add constraint meals_category_check check (category in ('breakfast','lunch','dinner','snack'));
+alter table public.meals enable row level security;
+drop policy if exists "meals read"  on public.meals;
+drop policy if exists "meals write" on public.meals;
+create policy "meals read"  on public.meals for select using (public.is_coach() or public.is_active_member());
+create policy "meals write" on public.meals for all    using (public.is_coach()) with check (public.is_coach());
+
+-- 7.14) تذكير بموعد التمرين (Web Push) ---------------------------------------
+-- المتدرب يختار أيامه وساعة التذكير. الـ Edge Function send-reminders بتتنادى من pg_cron كل 15 دقيقة
+-- وبتقرا الجدولين بـ service_role. last_sent_on بتكتبه الـ function بس (عشان ما يتبعتش مرتين في اليوم).
+create table if not exists public.training_reminders (
+  member_id    uuid primary key default auth.uid() references public.profiles(id) on delete cascade,
+  days         smallint[] not null default '{}' check (days <@ array[0,1,2,3,4,5,6]::smallint[]),
+  remind_at    time not null check (extract(minute from remind_at)::int % 15 = 0 and extract(second from remind_at) = 0),
+  enabled      boolean not null default true,
+  last_sent_on date
+);
+create table if not exists public.push_subscriptions (
+  id         bigint generated always as identity primary key,
+  member_id  uuid not null default auth.uid() references public.profiles(id) on delete cascade,
+  endpoint   text not null unique check (char_length(endpoint) <= 1000),
+  p256dh     text not null check (char_length(p256dh) <= 200),
+  auth       text not null check (char_length(auth) <= 100),
+  created_at timestamptz not null default now()
+);
+create index if not exists push_subscriptions_member_idx on public.push_subscriptions (member_id);
+alter table public.training_reminders enable row level security;
+alter table public.push_subscriptions enable row level security;
+
+-- المتدرب ما يقدرش يكتب last_sent_on: الكتابة على الأعمدة دي بس
+-- (member_id في الـ update لأن upsert بتاع PostgREST بيعمل set لكل أعمدة الطلب، والسياسة بتمنع تغييره لحد تاني)
+revoke insert, update on public.training_reminders from anon, authenticated;
+grant insert (member_id, days, remind_at, enabled), update (member_id, days, remind_at, enabled) on public.training_reminders to authenticated;
+
+drop policy if exists "reminders read"   on public.training_reminders;
+drop policy if exists "reminders insert" on public.training_reminders;
+drop policy if exists "reminders update" on public.training_reminders;
+drop policy if exists "reminders delete" on public.training_reminders;
+create policy "reminders read"   on public.training_reminders for select using (member_id = auth.uid() or public.is_coach());
+create policy "reminders insert" on public.training_reminders for insert with check (member_id = auth.uid());
+create policy "reminders update" on public.training_reminders for update using (member_id = auth.uid()) with check (member_id = auth.uid());
+create policy "reminders delete" on public.training_reminders for delete using (member_id = auth.uid());
+
+drop policy if exists "push subs read"   on public.push_subscriptions;
+drop policy if exists "push subs insert" on public.push_subscriptions;
+drop policy if exists "push subs delete" on public.push_subscriptions;
+create policy "push subs read"   on public.push_subscriptions for select using (member_id = auth.uid());
+create policy "push subs insert" on public.push_subscriptions for insert with check (member_id = auth.uid());
+create policy "push subs delete" on public.push_subscriptions for delete using (member_id = auth.uid());
+
+-- الجدولة: لازم pg_cron و pg_net يكونوا متفعّلين (Dashboard ← Integrations ← Cron)
+-- قبل أول تشغيل حط السرّين في Vault مرة واحدة (مش هنا):
+--   select vault.create_secret('<نفس REMINDERS_SECRET اللي في الـ function>', 'reminders_secret');
+--   select vault.create_secret('https://<project-ref>.supabase.co', 'project_url');
+create extension if not exists pg_cron;
+create extension if not exists pg_net;
+select cron.schedule('send-reminders', '*/15 * * * *', $$
+  select net.http_post(
+    url     := (select decrypted_secret from vault.decrypted_secrets where name = 'project_url') || '/functions/v1/send-reminders',
+    headers := jsonb_build_object('Authorization', 'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'reminders_secret'))
+  ) $$);
+-- سجل تشغيل الـ cron بيكبر لوحده، فبنمسح الأقدم من أسبوع
+select cron.schedule('cleanup-cron-log', '0 3 * * *', $$ delete from cron.job_run_details where end_time < now() - interval '7 days' $$);
 
 -- 8) بيانات بداية (أمثلة تقدر تعدّلها أو تمسحها من لوحة الكوتش) ----------
 insert into public.exercises (muscle, name, sets, reps, cues, sort)

@@ -80,7 +80,6 @@ js/app.js             السايد بار والتنقل بين الصفحات �
 js/youtube.js         تشغيل فيديو اليوتيوب في نافذة جوه الموقع
 js/ui.js              نوافذ التعديل والرسايل
 js/views/exercises.js التمارين حسب العضلة
-js/views/programs.js  جداول التمرين
 js/views/account.js   صفحة حسابي
 js/views/members.js   لوحة الكوتش للمتدربين
 js/views/results.js   نتايج المشتركين (الكوتش)
@@ -150,6 +149,26 @@ images/               صور الكوتش والمتدربين
 3. بعد ما الموقع يترفع: في Supabase ← **Authentication ← Attack Protection** ← فعّل **Enable CAPTCHA protection**، واختار **Turnstile by Cloudflare**، وحط الـ Secret Key.
 
 الترتيب مهم: لو فعّلت الحماية في Supabase قبل ما ترفع الموقع بالمفتاح، الدخول والتسجيل هيقفوا.
+
+## إشعارات تذكير التمرين (قسم 7.14)
+
+المتدرب بيختار أيامه وساعة التذكير من «حسابي»، و`pg_cron` كل ربع ساعة بينادي Edge Function اسمها `send-reminders` تبعت Web Push للي ميعادهم جه (بتوقيت القاهرة). بتتعمل مرة واحدة بعد دمج الـ PR، وشخص واحد بس يعملها:
+
+1. Supabase ← **Integrations ← Cron** ← **Install integration** (ده بيفعّل `pg_cron`). و`pg_net` بيتفعّل من القسم نفسه في الخطوة 6.
+2. اعمل مفاتيح VAPID: `npx web-push generate-vapid-keys`. المفتاح العام (Public) يتحط في `VAPID_PUBLIC_KEY` في `js/config.js` ويترفع مع الموقع. المفتاح السري (Private) ما يتحطش في الريبو أبداً.
+3. اعمل سر عشوائي طويل لـ `REMINDERS_SECRET` (مثلاً `node -e "console.log(require('crypto').randomBytes(24).toString('base64url'))"`).
+4. Supabase ← **Edge Functions ← Secrets**، وضيف: `VAPID_PUBLIC_KEY` و`VAPID_PRIVATE_KEY` و`VAPID_SUBJECT` (بالشكل ده: `mailto:الإيميل`) و`REMINDERS_SECRET`. من غير علامات تنصيص.
+5. ارفع الـ function: `npx supabase functions deploy send-reminders --no-verify-jwt --use-api`. أو من **Edge Functions ← Deploy a new function ← Via Editor** باسم `send-reminders`، بملفين بالأسامي دي بالظبط: `index.ts` و`slot.js` (من `supabase/functions/send-reminders/`)، وبعدها من **Settings** اقفل **Verify JWT** (الحماية بالسر بتاعنا مش بـ JWT).
+6. جرّب: افتح رابط الـ function في المتصفح، لازم يرجّع `forbidden`.
+7. SQL Editor: حط السرّين في Vault (نفس قيمة `REMINDERS_SECRET` بالظبط، وإلا الـ cron هيترفض بـ 403):
+   ```sql
+   select vault.create_secret('<REMINDERS_SECRET>', 'reminders_secret');
+   select vault.create_secret('https://<project-ref>.supabase.co', 'project_url');
+   ```
+8. شغّل قسم `7.14` من `schema.sql`، واتأكد إن `select jobname from cron.job;` بيرجّع `send-reminders` و`cleanup-cron-log`.
+9. بعد أول ربع ساعة: `select status_code, content from net._http_response order by created desc limit 1;` لازم يرجّع `200` و`{"sent":...}`. لو رجّع `VAPID config: ...` يبقى فيه secret من بتوع VAPID ناقص أو غلط.
+
+ملاحظات: على الآيفون الإشعارات بتشتغل بس لو الموقع متثبّت على الشاشة الرئيسية (iOS 16.4 أو أحدث). والمتدرب بياخد تذكير واحد بس في اليوم، ولو الـ cron فوّت ربع ساعة التذكير بتاعها ما بيتبعتش متأخر.
 
 ## المراقبة والنسخ الاحتياطي (GitHub Actions)
 
