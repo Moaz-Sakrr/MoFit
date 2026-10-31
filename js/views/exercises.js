@@ -9,9 +9,11 @@ export const MUSCLES = [
 ];
 
 let muscle = "chest";
+let isStale = () => false; // من ctx الصفحة الحالية، عشان أي حفظ بيخلص بعد ما المستخدم يمشي ما يرسمش فوق الصفحة الجديدة
 let list = [];
 
 export async function renderExercises(main, { isCoach, stale }) {
+  isStale = stale;
   main.innerHTML = `${loadingView("rows")}`;
   const { data, error } = await supabase.from("exercises").select("*").order("sort").order("id");
   if (stale()) return;
@@ -21,6 +23,7 @@ export async function renderExercises(main, { isCoach, stale }) {
 }
 
 function draw(main, isCoach) {
+  if (isStale()) return;
   const count = (m) => list.filter((e) => e.muscle === m).length;
   const shown = list.filter((e) => e.muscle === muscle);
   const tabs = MUSCLES.map(([k, n]) =>
@@ -44,7 +47,7 @@ function draw(main, isCoach) {
   }).join("");
 
   main.innerHTML = `
-    <div class="view-head"><div><h1>التمارين</h1><p>اختار العضلة، واضغط على الصورة عشان تشوف فيديو طريقة الأداء. الأرقام هي المجموعات × العدات.</p></div>
+    <div class="view-head"><div><h1>مكتبة التمارين</h1><p>ضيف التمارين بفيديو اليوتيوب بتاعها، وبعدين اختار منها وانت بتعمل خطة كل متدرب. المتدربين مش بيشوفوا الصفحة دي.</p></div>
       ${isCoach ? `<button class="btn btn-tape" type="button" id="add-ex">إضافة تمرين</button>` : ""}</div>
     <div class="index" role="tablist">${tabs}</div>
     ${shown.length ? `<ul class="rows">${rows}</ul>` : `<div class="empty gap-top">مفيش تمارين للعضلة دي لسه.</div>`}`;
