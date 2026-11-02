@@ -419,12 +419,14 @@ dialog[open]::backdrop{animation:fade .2s ease-out}
 .wk-thumb .play span{width:38px;height:38px}
 .wk-thumb .play svg{width:16px;height:16px}
 .wk-ex .legend{margin-top:14px}
+/* الآيفون كان بيرسم عنوان التمرين فوق صف المجموعة لما الكارت يتحرك بـ transform وفيه صفوف بـ overflow:hidden، فالكارت بيظهر بالشفافية بس */
+.main > .panel.wk-ex{animation-name:fade}
 .wk-actions{display:flex;gap:10px;margin-top:14px}
 .wk-actions .btn{flex:1;min-height:44px}
 .wk-head,.wk-set{display:grid;grid-template-columns:2.6rem 1fr 1fr 92px;align-items:stretch}
 .wk-head{font-size:.8rem;color:var(--ink-2);text-align:center;margin-top:12px}
 /* كل مجموعة صف واحد بحدود، وخطوط فاصلة بين رقم المجموعة والوزن والعدات والزرار */
-.wk-swipe{position:relative;display:grid;grid-template-rows:1fr;margin-top:8px;border-radius:10px;overflow:hidden;transition:grid-template-rows .3s ease,margin-top .3s ease,opacity .25s ease}
+.wk-swipe{position:relative;display:grid;grid-template-rows:1fr;margin-top:8px;border-radius:10px;overflow:hidden;isolation:isolate;transition:grid-template-rows .3s ease,margin-top .3s ease,opacity .25s ease}
 .wk-swipe>.wk-set{position:relative;z-index:1;min-height:0;touch-action:pan-y;user-select:none;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
 .wk-swipe.drag>.wk-set{transition:none}
 .wk-swipe.open>.wk-set{transform:translateX(-88px)}
